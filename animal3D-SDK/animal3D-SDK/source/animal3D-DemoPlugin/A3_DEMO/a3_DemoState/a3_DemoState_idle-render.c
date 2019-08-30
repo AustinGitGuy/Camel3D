@@ -391,8 +391,8 @@ void a3demo_render_main(const a3_DemoState *demoState,
 				a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uLightCt, 1, &demoState->forwardLightCount);
 				a3shaderUniformBufferActivate(demoState->ubo_pointLight, 2);
 
-				// ****TO-DO: activate texture atlas
-
+				// ****TO-DO: activate texture atlas - DONE
+				a3textureActivate(demoState->tex_atlas_dm, a3tex_unit00);
 
 				// individual object requirements: 
 				//	- modelviewprojection
@@ -415,11 +415,11 @@ void a3demo_render_main(const a3_DemoState *demoState,
 					a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, color[k]);
 
 					// activate textures
-					a3textureActivate(tex_dm[k], a3tex_unit00);
+					//a3textureActivate(tex_dm[k], a3tex_unit00);
 
-					// ****TO-DO: replace above texture activation with 
+					// ****TO-DO: replace above texture activation with - DONE
 					//	sending atlas transform uniform for the current object
-
+					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, atlasTransformPtr[k].m);
 
 					// draw
 					currentDrawable = drawable[k];

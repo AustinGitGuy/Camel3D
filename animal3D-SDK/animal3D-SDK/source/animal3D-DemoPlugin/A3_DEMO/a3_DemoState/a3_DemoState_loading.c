@@ -462,7 +462,7 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 			{ { { 0 },	"shdr-vs:pass-tex-nrm-inst",	a3shader_vertex  ,	1,{ A3_DEMO_VS"basic-shading/e/passTexcoordNormal_transform_instanced_vs4x.glsl" } } },
 			{ { { 0 },	"shdr-vs:pass-tex-nrm",			a3shader_vertex  ,	1,{ A3_DEMO_VS"basic-shading/e/passTexcoordNormal_transform_vs4x.glsl" } } },
 			{ { { 0 },	"shdr-vs:pass-tex-inst",		a3shader_vertex  ,	1,{ A3_DEMO_VS"basic-shading/e/passTexcoord_transform_instanced_vs4x.glsl" } } },
-			{ { { 0 },	"shdr-vs:pass-tex",				a3shader_vertex  ,	1,{ A3_DEMO_VS"basic-shading/e/passTexcoord_transform_vs4x.glsl" } } },
+			{ { { 0 },	"shdr-vs:pass-tex",				a3shader_vertex  ,	1,{ A3_DEMO_VS"basic-shading/e/passTexcoord_transform_vs4x.glsl" } } }, //DISABLE THE E HERE
 
 			// fs
 			// basic display
@@ -470,7 +470,7 @@ void a3demo_loadShaders(a3_DemoState *demoState)
 			{ { { 0 },	"shdr-fs:draw-col-unif",		a3shader_fragment,	1,{ A3_DEMO_FS"basic-display/e/drawColorUnif_fs4x.glsl" } } },
 			// basic shading
 			{ { { 0 },	"shdr-fs:draw-Lambert-multi",	a3shader_fragment,	1,{ A3_DEMO_FS"basic-shading/e/drawLambertMulti_fs4x.glsl" } } },
-			{ { { 0 },	"shdr-fs:draw-tex",				a3shader_fragment,	1,{ A3_DEMO_FS"basic-shading/e/drawTexture_fs4x.glsl" } } },
+			{ { { 0 },	"shdr-fs:draw-tex",				a3shader_fragment,	1,{ A3_DEMO_FS"basic-shading/e/drawTexture_fs4x.glsl" } } }, //DISABLE THE E HERE
 		}
 	};
 	a3_DemoStateShader *const shaderListPtr = (a3_DemoStateShader *)(&shaderList), *shaderPtr;
