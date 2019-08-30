@@ -16,6 +16,7 @@ public:
 	Vector3 operator+(const Vector3 &mth) const;
 	Vector3 operator-(const Vector3 &mth) const;
 	Vector3 operator*(float mth) const;
+	Vector3 operator/(float mth) const;
 
 	float x;
 	float y;

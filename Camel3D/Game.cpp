@@ -201,6 +201,7 @@ void Game::Init(int width, int height){
 	currentProgram = "defaultProgram";
 	inited = true;
 	
+	std::cout << (Vector3(5, 5, 5) / 5).x << " " << (Vector3(5, 5, 5) / 5).y << " " << (Vector3(5, 5, 5) / 5).z;
 }
 
 void Game::Cleanup(){

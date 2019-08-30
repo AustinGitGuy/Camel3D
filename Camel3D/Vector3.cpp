@@ -3,38 +3,38 @@
 
 Vector3::Vector3(float nX, float nY, float nZ):x(nX),y(nY),z(nZ){}
 
-Vector3& Vector3::operator += (const Vector3& mth){
-	x += mth.x;
-	y += mth.y;
-	z += mth.z;
+Vector3& Vector3::operator += (const Vector3& other){
+	x += other.x;
+	y += other.y;
+	z += other.z;
 	return *this;
 }
 
-Vector3& Vector3::operator -= (const Vector3& mth){
-	x -= mth.x;
-	y -= mth.y;
-	z -= mth.z;
+Vector3& Vector3::operator -= (const Vector3& other){
+	x -= other.x;
+	y -= other.y;
+	z -= other.z;
 	return *this;
 }
 
-Vector3& Vector3::operator = (const Vector3& mth){
-	x = mth.x;
-	y = mth.y;
-	z = mth.z;
+Vector3& Vector3::operator = (const Vector3& other){
+	x = other.x;
+	y = other.y;
+	z = other.z;
 	return *this;
 }
 
-Vector3& Vector3::operator *= (float mth){
-	x *= mth;
-	y *= mth;
-	z *= mth;
+Vector3& Vector3::operator *= (float multiplier){
+	x *= multiplier;
+	y *= multiplier;
+	z *= multiplier;
 	return *this;
 }
 
-Vector3& Vector3::operator /= (float mth){
-	x /= mth;
-	y /= mth;
-	z /= mth;
+Vector3& Vector3::operator /= (float divisor){
+	x /= divisor;
+	y /= divisor;
+	z /= divisor;
 	return *this;
 }
 
@@ -50,24 +50,33 @@ Vector3 Vector3::operator-(const Vector3 &other) const {
 	return result;
 }
 
-Vector3 Vector3::operator*(float mth) const {
+Vector3 Vector3::operator*(float multiplier) const {
 	Vector3 result = *this;     
-	result.x *= mth;
-	result.y *= mth;
-	result.z *= mth;
+	result.x *= multiplier;
+	result.y *= multiplier;
+	result.z *= multiplier;
 
 	return result;
 }
 
-bool Vector3::operator==(const Vector3& mth){
-	if((x == mth.y) && (y == mth.y) && (z == mth.z)){
+Vector3 Vector3::operator/(float divisor) const {
+	Vector3 result = *this;
+	result.x /= divisor;
+	result.y /= divisor;
+	result.z /= divisor;
+
+	return result;
+}
+
+bool Vector3::operator==(const Vector3& other){
+	if((x == other.y) && (y == other.y) && (z == other.z)){
 		return true;
 	}
 	else return false;
 }
 
-bool Vector3::operator!=(const Vector3& mth){
-	if((x == mth.x) && (y == mth.y) && (z == mth.z)){
+bool Vector3::operator!=(const Vector3& other){
+	if((x == other.x) && (y == other.y) && (z == other.z)){
 		return false;
 	}
 	else return true;
