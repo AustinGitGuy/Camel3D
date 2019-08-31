@@ -17,6 +17,7 @@
 #include "BoxCollider.h"
 #include <time.h>
 #include "IL/ilut.h"
+#include "IL/ilu.h"
 
 Game* Game::instance = NULL;
 int Game::msID = 0;
@@ -142,10 +143,7 @@ void Game::Init(int width, int height){
 
 	//Generate FBOS
 	CreateBasicFBO("offscreen");
-
-	ilGenImages(1, &textures["terrain"]);
-	ilBindImage(textures["terrain"]);
-	ilLoadImage("terrain.bmp");
+	CreateTexture("terrain.bmp", "terrain");
 
 	//Create each program individually. Create - Attach - Link - Compile - Uniforms - Detach
 
@@ -543,29 +541,44 @@ void Game::CreateBasicFBO(std::string name){
 	}
 }
 
-void Game::CreateFBOFromTexture(std::string textureName, std::string fboName){
-	glGenFramebuffers(1, &fbos[fboName].fbo);
-	glGenRenderbuffers(1, &fbos[fboName].fbo);
+void Game::CreateTexture(std::string fileName, std::string texName){
+	unsigned int id;
 
-	glBindFramebuffer(GL_FRAMEBUFFER, fbos[fboName].fbo);
+	ilGenImages(1, &id);
+	ilBindImage(id);
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+	ilLoadImage((ILstring)fileName.c_str());
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+	if(&id == 0){
+		std::cout << "ERROR LOADING TEXTURE IMAGE: " << fileName;
+		return;
+	}
 
-	glBindTexture(GL_TEXTURE_2D, textures[textureName]);
+	ilBindImage(id);
+
+	glGenTextures(1, &textures[texName]);
+
+	glBindTexture(GL_TEXTURE_2D, textures[texName]); 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
+
+	/*
+	glGenFramebuffers(1, &fbos[texName].fbo);
+	glGenRenderbuffers(1, &fbos[texName].fbo);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbos[texName].fbo);
+
+	glBindTexture(GL_TEXTURE_2D, textures[fileName]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textures[textureName], 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textures[fileName], 0);
 
-	glBindRenderbuffer(GL_RENDERBUFFER, fbos[textureName].fbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, fbos[fileName].fbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, screenWidth, screenHeight);
-	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbos[textureName].fbo);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-		std::cout << "Created framebuffer with name: " << textureName << std::endl;
-	}
-	else {
-		std::cout << "Error creating framebuffer with name: " << textureName << std::endl;
-	}
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbos[fileName].fbo);
+	*/
 }
 
 void Game::CreateProgram(std::string name, bool oneDraw){

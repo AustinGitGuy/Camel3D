@@ -59,7 +59,7 @@ class Game {
 		void LinkProgram(std::string name);
 		void DetachShaders(std::string name);
 		void CreateBasicFBO(std::string name);
-		void CreateFBOFromTexture(std::string textureName, std::string fboName);
+		void CreateTexture(std::string fileName, std::string texName);
 		void DrawFBO(std::string name);
 		GameObject* FindObject(std::string name);
 		int FindIndex(std::string name);
