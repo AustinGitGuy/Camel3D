@@ -161,6 +161,19 @@ void Game::Init(int width, int height){
 	LinkProgram("noiseProgram");
 	CompileShader("noiseProgram");
 
+	glUseProgram(programs["noiseProgram"].id);
+	GLint loc = glGetUniformLocation(programs["noiseProgram"].id, "terrain");
+	glUniform1i(loc, 0);
+
+	GLuint texCoordLoc = glGetAttribLocation(programs["noiseProgram"].id, "texCoord");
+
+	glEnableVertexAttribArray(texCoordLoc);
+	glVertexAttribPointer(texCoordLoc, 2, GL_FLOAT, 0, 0, 0);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_MULTISAMPLE);
+
 	CreateProgram("blueProgram");
 	CreateShader("blueProgram-vert", "vertex3.glsl", GL_VERTEX_SHADER);
 	AttachShader("blueProgram", "blueProgram-vert", "default-frag");
@@ -168,7 +181,7 @@ void Game::Init(int width, int height){
 	CompileShader("blueProgram");
 
 	glUseProgram(programs["blueProgram"].id);
-	GLint loc = glGetUniformLocation(programs["blueProgram"].id, "newColor");
+	loc = glGetUniformLocation(programs["blueProgram"].id, "newColor");
 	glUniform4f(loc, 0.0, 0.0, 1.0, 1.0);
 
 	CreateProgram("DiffuseProgram");
@@ -544,6 +557,7 @@ void Game::CreateBasicFBO(std::string name){
 void Game::CreateTexture(std::string fileName, std::string texName){
 	unsigned int id;
 
+	glActiveTexture(GL_TEXTURE0 + textureIndex);
 	ilGenImages(1, &id);
 	ilBindImage(id);
 	ilEnable(IL_ORIGIN_SET);
@@ -561,6 +575,11 @@ void Game::CreateTexture(std::string fileName, std::string texName){
 
 	glBindTexture(GL_TEXTURE_2D, textures[texName]); 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	/*
 	glGenFramebuffers(1, &fbos[texName].fbo);

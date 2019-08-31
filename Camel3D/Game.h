@@ -109,6 +109,7 @@ class Game {
 		int mID;
 
 		int spawnNumber = 0;
+		int textureIndex = 0;
 
 		bool inited;
 		bool stopped;
