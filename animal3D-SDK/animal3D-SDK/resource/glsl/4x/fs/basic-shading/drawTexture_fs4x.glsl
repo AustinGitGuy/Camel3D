@@ -31,10 +31,13 @@
 //	3) sample texture in main
 //	4) copy texture sample to output
 
-out layout (location = 0) vec4 rtFragColor;
+in vec2 vTexCoord; // (1)
 
-void main()
-{
-	// DUMMY OUTPUT: all fragments are OPAQUE GREEN
-	rtFragColor = vec4(0.0, 1.0, 0.0, 1.0);
+out vec4 rtFragColor;
+
+uniform sampler2D uTex_dm; // (2)
+
+void main(){
+	vec4 texData = texture(uTex_dm, vTexCoord); // (3)
+	rtFragColor = texData; // (4)
 }
