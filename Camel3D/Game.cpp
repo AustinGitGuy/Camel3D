@@ -278,8 +278,8 @@ void Game::DrawFBO(std::string name){
 }
 
 void Game::Update(){
-	for (int i = 0; i < SKELE_PARTS; i++) {
-		if (timeElapsed <= 5) {
+	for(int i = 0; i < SKELE_PARTS; i++){
+		if(timeElapsed <= 5){
 			RotateObjectTime(FindIndex("SkeleRoot") + i, skeleRotations[i], timeElapsed / 100);
 		}
 	}
