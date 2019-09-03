@@ -70,7 +70,7 @@ extern "C"
 
 //	};
 
-
+	//Part 1 of step 2: DONE
 	// description of single keyframe
 	// metaphor: beads
 	struct a3_Keyframe
@@ -78,13 +78,11 @@ extern "C"
 		// index in keyframe pool
 		a3ui32 index;
 
-		// ****TO-DO
 		// duration of keyframe and reciprocal
+		a3real dur, durInv;
 
-
-		// ****TO-DO
 		// temporary value can just be an index mapping to some data
-
+		a3i32 value;
 	};
 
 	// pool of keyframe descriptors
@@ -97,7 +95,6 @@ extern "C"
 		a3ui32 count;
 	};
 
-
 	// description of single clip
 	// metaphor: string with beads on it
 	struct a3_Clip
@@ -108,18 +105,15 @@ extern "C"
 		// index in clip pool
 		a3ui32 index;
 
-		// ****TO-DO
 		// duration of clip and reciprocal; can be calculated as the sum of 
 		//	all keyframe durations or distributed across keyframes
+		a3real dur, durInv;
 
-
-		// ****TO-DO
 		// number of keyframes in clip (includes first and final)
+		a3i32 numKeys;
 
-
-		// ****TO-DO
 		// temporary first and final keyframe indices in pool
-
+		a3i32 first, final;
 
 		// keyframes to reference from pool; start of array
 		const a3_Keyframe* keyframeListBasePtr_pool;

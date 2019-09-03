@@ -40,7 +40,8 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 
 		// ****TO-DO
 		// set all members
-
+		clipCtrl_out->keyTime = clipCtrl_out->keyNormal = a3real_zero;
+		clipCtrl_out->playDir = initialPlayDirection;
 
 		// set clip list from pool
 		a3clipControllerSetClip(clipCtrl_out, clipPool, clipIndex_pool);

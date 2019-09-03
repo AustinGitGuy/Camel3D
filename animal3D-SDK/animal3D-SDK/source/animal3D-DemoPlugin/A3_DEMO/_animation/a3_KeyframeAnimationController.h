@@ -62,22 +62,19 @@ extern "C"
 		// index of clip in pool we are controlling
 		a3ui32 clipIndex_pool;
 
-		// ****TO-DO
-		// add index of keyframe within clip that controller is currently on
+		// Index of keyframe within clip that controller is currently on
+		a3i32 keyClipIndex;
 
-
-		// ****TO-DO
-		// add keyframe time (0.0 to keyframe duration) and normalized (0.0 to 1.0)
-
+		// Keyframe time (0.0 to keyframe duration) and normalized (0.0 to 1.0)
+		a3real keyTime, keyNormal;
 
 		// ****TO-DO
-		// add response actions to passing the final keyframe forward or the first keyframe in reverse
+		// Response actions to passing the final keyframe forward or the first keyframe in reverse
 		// this is ultimately to determine looping/ping-pong/stop/etc
 
 
-		// ****TO-DO
-		// add play direction which ultimately says how we update
-
+		// Play direction which ultimately says how we update
+		a3_ClipPlayDirection playDir;
 
 		// clip list from pool
 		const a3_Clip* clipListBasePtr_pool;
@@ -88,7 +85,6 @@ extern "C"
 		// pointer to active keyframe
 		const a3_Keyframe* keyframePtr;
 	};
-
 
 //-----------------------------------------------------------------------------
 

@@ -430,9 +430,10 @@ void a3demo_render_main(const a3_DemoState *demoState,
 						// activate sprite sheet texture
 						a3textureActivate(demoState->testSpriteSheetAtlas->texture, a3tex_unit00);
 
-						// ****TO-DO
+						//Part 6 of 2: DONE
 						// send atlas transform based on current sprite cell
-
+						a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, 
+							demoState->testSpriteSheetAtlasTransformList[demoState->testSpriteSheetClipController->keyframePtr->value].mm);
 					}
 					else
 					{
@@ -442,7 +443,6 @@ void a3demo_render_main(const a3_DemoState *demoState,
 						// replace above texture activation with sending atlas transform uniform for the current object
 						a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, atlasTransformPtr[k].mm);
 					}
-
 					
 					// draw
 					currentDrawable = drawable[k];

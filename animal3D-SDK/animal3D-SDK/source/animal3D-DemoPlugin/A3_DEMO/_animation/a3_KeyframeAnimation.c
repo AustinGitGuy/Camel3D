@@ -72,16 +72,19 @@ a3i32 a3keyframePoolRelease(a3_KeyframePool* keyframePool)
 	return -1;
 }
 
+//Part 2 of 2: DONE
 // initialize keyframe
-a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3ui32 value_x)
+a3i32 a3keyframeInit(a3_Keyframe* keyframe, const a3real dur, const a3ui32 value_x)
 {
-	if (keyframe_out)
+	if (keyframe)
 	{
-		// ****TO-DO
 		// set keyframe data
+		keyframe->dur = a3maximum(dur, 0);
+		keyframe->durInv = a3recipsafe(keyframe->dur);
+		keyframe->value = value_x;
 
 		// done
-		return keyframe_out->index;
+		return keyframe->index;
 	}
 	return -1;
 }
@@ -126,26 +129,28 @@ a3i32 a3clipPoolRelease(a3_ClipPool* clipPool)
 
 // initialize clip with first and last indices
 // duration is calculated as the total of keyframe durations
-a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex)
+a3i32 a3clipInit(a3_Clip* clip, const a3byte clipName[a3keyframeAnimation_nameLenMax], const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex)
 {
-	if (clip_out && keyframePool && keyframePool->keyframe && firstKeyframeIndex < keyframePool->count && finalKeyframeIndex >= firstKeyframeIndex)
+	if (clip && keyframePool && keyframePool->keyframe && firstKeyframeIndex < keyframePool->count && finalKeyframeIndex >= firstKeyframeIndex)
 	{
 		// copy name
-		strncpy(clip_out->name, A3_CLIP_SEARCHNAME, a3keyframeAnimation_nameLenMax);
-		clip_out->name[a3keyframeAnimation_nameLenMax - 1] = 0;
+		strncpy(clip->name, A3_CLIP_SEARCHNAME, a3keyframeAnimation_nameLenMax);
+		clip->name[a3keyframeAnimation_nameLenMax - 1] = 0;
 
 		// ****TO-DO
 		// calculate total frames
-
+		clip->first = firstKeyframeIndex;
+		clip->final = finalKeyframeIndex;
+		clip->numKeys = 1 + finalKeyframeIndex - firstKeyframeIndex;
 
 		// set keyframe list from pool
-		clip_out->keyframeListBasePtr_pool = keyframePool->keyframe;
+		clip->keyframeListBasePtr_pool = keyframePool->keyframe;
 
 		// calculate duration
-		a3clipCalculateDuration(clip_out);
+		a3clipCalculateDuration(clip);
 
 		// done
-	//	return clip_out->keyframeCount;	// something meaningful wow
+		return clip->numKeys;	// something meaningful wow
 	}
 	return -1;
 }

@@ -29,12 +29,12 @@
 
 //-----------------------------------------------------------------------------
 
+//Part 4 of Step 2: DONE
 // utility to set next keyframe index
 inline a3i32 a3clipController_internalSetKeyframe(a3_ClipController* clipCtrl, const a3ui32 keyframeIndex_clip)
 {
-	// ****TO-DO: uncomment
-//	clipCtrl->keyframeIndex_clip = keyframeIndex_clip;
-//	clipCtrl->keyframePtr = clipCtrl->clipPtr->keyframeListBasePtr_pool + clipCtrl->keyframeIndex_clip;
+	clipCtrl->keyClipIndex = keyframeIndex_clip;
+	clipCtrl->keyframePtr = clipCtrl->clipPtr->keyframeListBasePtr_pool + clipCtrl->keyClipIndex;
 	return keyframeIndex_clip;
 }
 
@@ -48,11 +48,21 @@ inline a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt
 	{
 		// ****TO-DO: uncomment
 		// flag to continue solving
-	//	a3boolean solving = 1;
+		a3boolean solving = 1;
 
-		// ****TO-DO
-		// IMPLEMENT ME
+		//First, update keyframeTime (real time where we are in time - Dependant on direction)
+		clipCtrl->keyTime += dt * clipCtrl->playDir;
 
+		while(solving){
+			// ****TO-DO - Do on own
+			// IMPLEMENT ME
+			solving = 0;
+		}
+
+		//Update keyframe normal
+		clipCtrl->keyNormal = clipCtrl->keyTime * clipCtrl->keyframePtr->durInv;
+
+		return clipCtrl->keyClipIndex;
 	}
 	return -1;
 }
@@ -62,9 +72,8 @@ inline a3i32 a3clipControllerSetPlayDirection(a3_ClipController* clipCtrl, const
 {
 	if (clipCtrl)
 	{
-		// ****TO-DO
 		// set play direction
-
+		clipCtrl->playDir = playDirection;
 	}
 	return -1;
 }
@@ -105,9 +114,8 @@ inline a3i32 a3clipControllerSetClip(a3_ClipController* clipCtrl, const a3_ClipP
 		clipCtrl->clipListBasePtr_pool = clipPool->clip;
 		clipCtrl->clipPtr = clipPool->clip + clipIndex_pool;
 
-		// ****TO-DO: 
 		// call internal set function with first keyframe in clip as argument
-
+		a3clipController_internalSetKeyframe(clipCtrl, clipCtrl->clipListBasePtr_pool->first);
 
 		// done, return clip index
 		return clipIndex_pool;
