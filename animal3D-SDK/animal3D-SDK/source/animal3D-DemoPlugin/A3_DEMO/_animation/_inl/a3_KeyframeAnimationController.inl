@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
 
 //Part 4 of Step 2: DONE
-// utility to set next keyframe index
+// utility to set next keyframe index - Use this once we get the clip we need from update
 inline a3i32 a3clipController_internalSetKeyframe(a3_ClipController* clipCtrl, const a3ui32 keyframeIndex_clip)
 {
 	clipCtrl->keyClipIndex = keyframeIndex_clip;
@@ -56,6 +56,10 @@ inline a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt
 		while(solving){
 			// ****TO-DO - Do on own
 			// IMPLEMENT ME
+
+			//Check all the edge cases (See if we reached the end, see if we are out of the current keyframe, check if we are stopped, etc)
+
+			//Temp to prevent animal from breaking. Comment out later
 			solving = 0;
 		}
 
