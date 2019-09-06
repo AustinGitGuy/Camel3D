@@ -65,13 +65,16 @@ extern "C"
 		// Index of keyframe within clip that controller is currently on
 		a3i32 keyClipIndex;
 
-		// Keyframe time (0.0 to keyframe duration) and normalized (0.0 to 1.0)
-		a3real keyTime, keyNormal;
+		// Keyframe time (0.0 to keyframe duration)
+		a3real keyTime;
+		
+		//Normalized(0.0 to 1.0) keyframe time
+		a3real keyNormal;
 
 		// ****TO-DO
 		// Response actions to passing the final keyframe forward or the first keyframe in reverse
 		// this is ultimately to determine looping/ping-pong/stop/etc
-
+		a3boolean pingPong;
 
 		// Play direction which ultimately says how we update
 		a3_ClipPlayDirection playDir;

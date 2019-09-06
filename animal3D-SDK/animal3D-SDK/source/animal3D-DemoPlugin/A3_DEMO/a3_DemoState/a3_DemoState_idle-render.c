@@ -162,6 +162,15 @@ void a3demo_render_main_controls(const a3_DemoState *demoState,
 		"        Output (%u / %u) ('{' | '}'): %s", demoOutput + 1, demoOutputCount, outputText[demoSubMode][demoOutput]);
 	a3textDraw(demoState->text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
 		"    Forward pipeline (%u / %u) ('j' | 'k'): %s", demoState->forwardShadingMode + 1, demoState->forwardShadingModeCount, forwardShadingName[demoState->forwardShadingMode]);
+	if(demoState->testSpriteSheetClipController->pingPong){
+		a3textDraw(demoState->text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		" Ping pong: True (p)");
+	}
+	else {
+		a3textDraw(demoState->text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+			" Ping pong: False (p)");
+	}
+
 
 	// toggles
 	textOffset += textOffsetDelta;

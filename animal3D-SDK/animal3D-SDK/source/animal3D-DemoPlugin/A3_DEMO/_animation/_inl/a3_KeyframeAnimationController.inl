@@ -44,8 +44,7 @@ inline a3i32 a3clipController_internalSetKeyframe(a3_ClipController* clipCtrl, c
 // update clip controller
 inline a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 {
-	if (clipCtrl && clipCtrl->clipListBasePtr_pool)
-	{
+	if (clipCtrl && clipCtrl->clipListBasePtr_pool){
 		// ****TO-DO: uncomment
 		// flag to continue solving
 		a3boolean solving = 1;
@@ -58,9 +57,69 @@ inline a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt
 			// IMPLEMENT ME
 
 			//Check all the edge cases (See if we reached the end, see if we are out of the current keyframe, check if we are stopped, etc)
+			switch(clipCtrl->playDir){
+				//Stopped
+				case a3clip_stop:
+					solving = 0;
+					break;
+				case a3clip_playForward:
+					if(clipCtrl->keyTime > clipCtrl->keyframePtr->dur){
+						if(clipCtrl->keyClipIndex + 1 > clipCtrl->clipPtr->final){
+							//Change if ping-ponging/looping
+							if(clipCtrl->pingPong){
+								a3clipController_internalSetKeyframe(clipCtrl, clipCtrl->clipPtr->final - 1);
+								clipCtrl->keyTime = clipCtrl->keyframePtr->dur;
+								clipCtrl->playDir = -1;
+								solving = 0;
+							}
+							else {
+								a3clipController_internalSetKeyframe(clipCtrl, clipCtrl->clipPtr->first);
+								clipCtrl->keyTime = 0;
+								solving = 0;
+							}
+						}
+						else {
+							a3clipController_internalSetKeyframe(clipCtrl, clipCtrl->keyClipIndex + 1);
+							clipCtrl->keyTime = 0;
+						}
+						
+					}
+					else {
+						//If we are in current keyframe
+						solving = 0;
+					}
+				case a3clip_playReverse:
+					if(clipCtrl->keyTime < 0){
+						if(clipCtrl->keyClipIndex - 1 < clipCtrl->clipPtr->first){
+							if(clipCtrl->pingPong){
+								a3clipController_internalSetKeyframe(clipCtrl, clipCtrl->clipPtr->first + 1);
+								clipCtrl->keyTime = 0;
+								clipCtrl->playDir = 1;
+								solving = 0;
+							}
+							else {
+								a3clipController_internalSetKeyframe(clipCtrl, clipCtrl->clipPtr->final - 1);
+								clipCtrl->keyTime = clipCtrl->keyframePtr->dur;
+								solving = 0;
+							}
+						}
+						else {
+							a3clipController_internalSetKeyframe(clipCtrl, clipCtrl->keyClipIndex - 1);
+							clipCtrl->keyTime = clipCtrl->keyframePtr->dur;
+						}
+					}
+					else {
+						//If we are in current keyframe
+						solving = 0;
+					}
+			}
+
+
+
+			
 
 			//Temp to prevent animal from breaking. Comment out later
-			solving = 0;
+			//solving = 0;
 		}
 
 		//Update keyframe normal

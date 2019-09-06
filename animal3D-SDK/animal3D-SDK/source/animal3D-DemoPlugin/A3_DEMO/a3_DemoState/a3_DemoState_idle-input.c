@@ -87,6 +87,7 @@ void a3demo_input_main(a3_DemoState *demoState, a3f64 dt)
 			(a3real)a3keyboardGetDifference(demoState->keyboard, a3key_E, a3key_Q),
 			(a3real)a3keyboardGetDifference(demoState->keyboard, a3key_S, a3key_W)
 		);
+
 		if (a3mouseIsHeld(demoState->mouse, a3mouse_left))
 		{
 			azimuth = -(a3real)a3mouseGetDeltaX(demoState->mouse);
@@ -107,7 +108,9 @@ void a3demo_input_main(a3_DemoState *demoState, a3f64 dt)
 
 		// ****TO-DO
 		// test sprite controller
-
+		if(a3keyboardIsPressed(demoState->keyboard, a3key_P)){
+			demoState->testSpriteSheetClipController->pingPong = !demoState->testSpriteSheetClipController->pingPong;
+		}
 	}
 }
 
