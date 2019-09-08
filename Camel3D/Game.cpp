@@ -132,14 +132,22 @@ void Game::Init(int width, int height){
 
 	bgColor = gray;
 
-	skeleRotations = new Vector3[SKELE_PARTS];
+	starting = new Clip<Vector3>(Keyframe<Vector3>(SKELE_PARTS, 5));
+	starting->AddKeyframe(Keyframe<Vector3>(SKELE_PARTS, 5));
+
+	auto it = std::next(starting->keys.begin(), 0);
 
 	for(int i = 0; i < SKELE_PARTS; i++){
-		skeleRotations[i] = VECTOR3_ZERO;
+		it->data[i] = VECTOR3_ZERO;
 	}
 
-	skeleRotations[6] = Vector3(0, 0, -69);
-	skeleRotations[7] = Vector3(0, 0, -140);
+	it->data[6] = Vector3(0, 0, -69);
+	it->data[7] = Vector3(0, 0, -140);
+
+	it = std::next(starting->keys.begin(), 1);
+
+	it->data[6] = Vector3(-.2f, .2f, 0);
+	it->data[7] = Vector3(-.65f, -.5f, 0);
 
 	//Generate FBOS
 	CreateBasicFBO("offscreen");
@@ -235,13 +243,14 @@ void Game::Cleanup(){
 	}
 	connectors.clear();
 
-	delete[] skeleRotations;
-
 	DetachShaders("DiffuseProgram");
 	DetachShaders("blueProgram");
 	DetachShaders("noiseProgram");
 	DetachShaders("defaultProgram");
 	DetachShaders("PostProcessProgram");
+	
+	auto it = std::next(starting->keys.begin(), 0);
+	it->DeleteData();
 
 	inited = false;
 	stopped = true;
@@ -278,10 +287,48 @@ void Game::DrawFBO(std::string name){
 }
 
 void Game::Update(){
-	for(int i = 0; i < SKELE_PARTS; i++){
-		if(timeElapsed <= 5){
-			RotateObjectTime(FindIndex("SkeleRoot") + i, skeleRotations[i], timeElapsed / 100);
-		}
+	auto it = std::next(starting->keys.begin(), starting->index);
+	switch(starting->dir){
+		case 1:
+			if(starting->elapsedTime <= it->loadupTime){
+				for(int i = 0; i < SKELE_PARTS; i++){
+					RotateObjectTime(FindIndex("SkeleRoot") + i, it->data[i], starting->elapsedTime / 100);
+				}
+			}
+			else if(starting->index + 1 == starting->keys.size()){
+				starting->dir = starting->Reverse;
+				if(starting->keys.size() > 1){
+					starting->index = starting->keys.size() - 2;
+				}
+				it = std::next(starting->keys.begin(), starting->index);
+				starting->elapsedTime = it->loadupTime;
+			}
+			else {
+				starting->index++;
+				starting->elapsedTime = 0;
+			}
+			break;
+		case -1:
+			if(starting->elapsedTime > 0){
+				for(int i = 0; i < SKELE_PARTS; i++){
+					RotateObjectTime(FindIndex("SkeleRoot") + i, it->data[i], (it->loadupTime - starting->elapsedTime) / 100);
+				}
+			}
+			else if(it == starting->keys.begin()){
+				starting->dir = starting->Forward;
+				starting->elapsedTime = 0;
+				if(starting->keys.size() != 1){
+					starting->index = 1;
+				}
+			}
+			else {
+				starting->index++;
+				it = std::next(starting->keys.begin(), starting->index);
+				starting->elapsedTime = it->loadupTime;
+			}
+			break;
+		case 0:
+			break;
 	}
 
 	if(snap){
@@ -291,6 +338,7 @@ void Game::Update(){
 		glUniform1f(loc, snapTime);
 	}
 
+	starting->elapsedTime += deltaTime * starting->dir;
 	timeElapsed += deltaTime;
 }
 

@@ -3,6 +3,8 @@
 #include <map>
 #include "GameObject.h"
 #include "Vector3.h"
+#include "GL/glut.h"
+#include "Clip.h"
 
 struct ObjLoader;
 class Vector3;
@@ -95,7 +97,7 @@ class Game {
 
 		Vector3 bgColor;
 
-		Vector3* skeleRotations;
+		Clip<Vector3>* starting;
 
 		std::map<std::string, Program> programs;
 		std::map<std::string, GLuint> shaders;
