@@ -132,22 +132,32 @@ void Game::Init(int width, int height){
 
 	bgColor = gray;
 
-	starting = new Clip<Vector3>(Keyframe<Vector3>(SKELE_PARTS, 5));
-	starting->AddKeyframe(Keyframe<Vector3>(SKELE_PARTS, 5));
+	starting = new Clip<Transform>(Keyframe<Transform>(SKELE_PARTS, 5));
+	starting->AddKeyframe(Keyframe<Transform>(SKELE_PARTS, 5));
 
 	auto it = std::next(starting->keys.begin(), 0);
 
 	for(int i = 0; i < SKELE_PARTS; i++){
-		it->data[i] = VECTOR3_ZERO;
+		it->data[i].objName = objects[FindIndex("SkeleRoot") + i]->name;
+		it->data[i].pos = objects[FindIndex("SkeleRoot") + i]->GetPos();
+		it->data[i].rot = VECTOR3_ZERO;
+		it->data[i].scale = VECTOR3_ONE;
 	}
 
-	it->data[6] = Vector3(0, 0, -69);
-	it->data[7] = Vector3(0, 0, -140);
+	it->data[6].rot = Vector3(0, 0, -69);
+	it->data[7].rot = Vector3(0, 0, -140);
 
 	it = std::next(starting->keys.begin(), 1);
 
-	it->data[6] = Vector3(-.2f, .2f, 0);
-	it->data[7] = Vector3(-.65f, -.5f, 0);
+	for (int i = 0; i < SKELE_PARTS; i++) {
+		it->data[i].objName = objects[FindIndex("SkeleRoot") + i]->name;
+		it->data[i].pos = objects[FindIndex("SkeleRoot") + i]->GetPos();
+		it->data[i].rot = VECTOR3_ZERO;
+		it->data[i].scale = VECTOR3_ONE;
+	}
+
+	it->data[6].rot = Vector3(-.2f, .2f, 0);
+	it->data[7].rot = Vector3(-.65f, -.5f, 0);
 
 	//Generate FBOS
 	CreateBasicFBO("offscreen");
@@ -249,8 +259,8 @@ void Game::Cleanup(){
 	DetachShaders("defaultProgram");
 	DetachShaders("PostProcessProgram");
 	
-	auto it = std::next(starting->keys.begin(), 0);
-	it->DeleteData();
+	//auto it = std::next(starting->keys.begin(), 0);
+	//it->DeleteData();
 
 	inited = false;
 	stopped = true;
@@ -287,50 +297,7 @@ void Game::DrawFBO(std::string name){
 }
 
 void Game::Update(){
-	auto it = std::next(starting->keys.begin(), starting->index);
-	switch(starting->dir){
-		case 1:
-			if(starting->elapsedTime <= it->loadupTime){
-				for(int i = 0; i < SKELE_PARTS; i++){
-					RotateObjectTime(FindIndex("SkeleRoot") + i, it->data[i], starting->elapsedTime / 100);
-				}
-			}
-			else if(starting->index + 1 == starting->keys.size()){
-				starting->dir = starting->Reverse;
-				if(starting->keys.size() > 1){
-					starting->index = starting->keys.size() - 2;
-				}
-				it = std::next(starting->keys.begin(), starting->index);
-				starting->elapsedTime = it->loadupTime;
-			}
-			else {
-				starting->index++;
-				starting->elapsedTime = 0;
-			}
-			break;
-		case -1:
-			if(starting->elapsedTime > 0){
-				for(int i = 0; i < SKELE_PARTS; i++){
-					RotateObjectTime(FindIndex("SkeleRoot") + i, it->data[i], (it->loadupTime - starting->elapsedTime) / 100);
-				}
-			}
-			else if(it == starting->keys.begin()){
-				starting->dir = starting->Forward;
-				starting->elapsedTime = 0;
-				if(starting->keys.size() != 1){
-					starting->index = 1;
-				}
-			}
-			else {
-				starting->index++;
-				it = std::next(starting->keys.begin(), starting->index);
-				starting->elapsedTime = it->loadupTime;
-			}
-			break;
-		case 0:
-			break;
-	}
-
+	Animate(starting);
 	if(snap){
 		snapTime += deltaTime;
 		glUseProgram(programs["SnapProgram"].id);
@@ -340,6 +307,58 @@ void Game::Update(){
 
 	starting->elapsedTime += deltaTime * starting->dir;
 	timeElapsed += deltaTime;
+}
+
+//Animate a transform clip
+void Game::Animate(Clip<Transform>* clip){
+	auto it = std::next(clip->keys.begin(), clip->index);
+	switch (clip->dir) {
+	case 1:
+		if(clip->elapsedTime <= it->loadupTime){
+			//TODO: Change this to array later
+			for(int i = 0; i < SKELE_PARTS; i++){
+				//TODO: Scale
+				//MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, starting->elapsedTime / 100);
+				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, starting->elapsedTime / 100);
+			}
+		}
+		else if (starting->index + 1 == starting->keys.size()) {
+			starting->dir = starting->Reverse;
+			if (starting->keys.size() > 1) {
+				starting->index = starting->keys.size() - 2;
+			}
+			it = std::next(starting->keys.begin(), starting->index);
+			starting->elapsedTime = it->loadupTime;
+		}
+		else {
+			starting->index++;
+			starting->elapsedTime = 0;
+		}
+		break;
+	case -1:
+		if (starting->elapsedTime > 0) {
+			for (int i = 0; i < SKELE_PARTS; i++) {
+				//TODO: Translate and scale
+				//MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, (it->loadupTime - starting->elapsedTime) / 100);
+				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, (it->loadupTime - starting->elapsedTime) / 100);
+			}
+		}
+		else if (it == starting->keys.begin()) {
+			starting->dir = starting->Forward;
+			starting->elapsedTime = 0;
+			if (starting->keys.size() != 1) {
+				starting->index = 1;
+			}
+		}
+		else {
+			starting->index++;
+			it = std::next(starting->keys.begin(), starting->index);
+			starting->elapsedTime = it->loadupTime;
+		}
+		break;
+	case 0:
+		break;
+	}
 }
 
 void Game::Display(){

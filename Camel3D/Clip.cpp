@@ -1,4 +1,5 @@
 #include "Clip.h"
+#include "Game.h"
 #include "Keyframe.h"
 
 template<class T>
@@ -26,3 +27,4 @@ template<class T>
 Clip<T>::~Clip(){}
 
 template class Clip<Vector3>;
+template class Clip<Transform>;

@@ -38,3 +38,4 @@ void Keyframe<T>::SetDatapoint(T* point){
 }
 
 template class Keyframe<Vector3>;
+template class Keyframe<Transform>;

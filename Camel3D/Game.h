@@ -23,6 +23,13 @@ struct FBO {
 	GLuint depth;
 };
 
+struct Transform {
+	Vector3 pos;
+	Vector3 rot;
+	Vector3 scale;
+	std::string objName;
+};
+
 class Game {
 
 	public:
@@ -69,6 +76,7 @@ class Game {
 		void RotateObjectTime(std::string partName, Vector3 newRot, float time);
 		void MoveObjectTime(int index, Vector3 newMove, float time);
 		void RotateObjectTime(int index, Vector3 newRot, float time);
+		void Animate(Clip<Transform>* clip);
 
 	private:
 		Game();
@@ -97,7 +105,7 @@ class Game {
 
 		Vector3 bgColor;
 
-		Clip<Vector3>* starting;
+		Clip<Transform>* starting;
 
 		std::map<std::string, Program> programs;
 		std::map<std::string, GLuint> shaders;
