@@ -137,12 +137,16 @@ void Game::Init(int width, int height){
 
 	auto it = std::next(starting->keys.begin(), 0);
 
+	//Working in relative space. Convert from physical space beforehand if you want to do that.
 	for(int i = 0; i < SKELE_PARTS; i++){
 		it->data[i].objName = objects[FindIndex("SkeleRoot") + i]->name;
 		it->data[i].pos = objects[FindIndex("SkeleRoot") + i]->GetPos();
 		it->data[i].rot = VECTOR3_ZERO;
 		it->data[i].scale = VECTOR3_ONE;
 	}
+
+	it->data[0].pos = Vector3(-1.5f, 3.1, -6);
+	it->data[0].scale = Vector3(1.2, 1.2, 1.2);
 
 	it->data[6].rot = Vector3(0, 0, -69);
 	it->data[7].rot = Vector3(0, 0, -140);
@@ -155,6 +159,8 @@ void Game::Init(int width, int height){
 		it->data[i].rot = VECTOR3_ZERO;
 		it->data[i].scale = VECTOR3_ONE;
 	}
+
+	it->data[0].scale = Vector3(1, 1, 1);
 
 	it->data[6].rot = Vector3(-.2f, .2f, 0);
 	it->data[7].rot = Vector3(-.65f, -.5f, 0);
@@ -259,8 +265,7 @@ void Game::Cleanup(){
 	DetachShaders("defaultProgram");
 	DetachShaders("PostProcessProgram");
 	
-	//auto it = std::next(starting->keys.begin(), 0);
-	//it->DeleteData();
+	delete starting;
 
 	inited = false;
 	stopped = true;
@@ -310,15 +315,17 @@ void Game::Update(){
 }
 
 //Animate a transform clip
-void Game::Animate(Clip<Transform>* clip){
+void Game::Animate(Clip<Transform>* clip, bool relative){
 	auto it = std::next(clip->keys.begin(), clip->index);
-	switch (clip->dir) {
+	switch(clip->dir){
+	case 0:
+		break;
 	case 1:
 		if(clip->elapsedTime <= it->loadupTime){
 			//TODO: Change this to array later
 			for(int i = 0; i < SKELE_PARTS; i++){
 				//TODO: Scale
-				//MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, starting->elapsedTime / 100);
+				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, starting->elapsedTime / 100, relative);
 				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, starting->elapsedTime / 100);
 			}
 		}
@@ -338,8 +345,8 @@ void Game::Animate(Clip<Transform>* clip){
 	case -1:
 		if (starting->elapsedTime > 0) {
 			for (int i = 0; i < SKELE_PARTS; i++) {
-				//TODO: Translate and scale
-				//MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, (it->loadupTime - starting->elapsedTime) / 100);
+				//TODO: Scale
+				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, (it->loadupTime - starting->elapsedTime) / 100, relative);
 				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, (it->loadupTime - starting->elapsedTime) / 100);
 			}
 		}
@@ -355,8 +362,6 @@ void Game::Animate(Clip<Transform>* clip){
 			it = std::next(starting->keys.begin(), starting->index);
 			starting->elapsedTime = it->loadupTime;
 		}
-		break;
-	case 0:
 		break;
 	}
 }
@@ -798,13 +803,37 @@ void Game::SpecialKeyboard(int key, int x, int y){
 	}
 }
 
-void Game::MoveObjectTime(std::string partName, Vector3 newMove, float time){
+void Game::MoveObjectTime(std::string partName, Vector3 newMove, float time, bool relative){
 	int index = FindIndex(partName);
-	objects[index]->Translate(Lerp(objects[index]->GetPos(true), newMove, time));
+	if(relative){
+		if(newMove == VECTOR3_ZERO){
+			return;
+		}
+		objects[index]->Translate(Lerp(VECTOR3_ZERO, newMove, time), true);
+	}
+	else {
+		//TODO: WORK WITH NON-RELATIVE SPACE
+		if(newMove == objects[index]->GetPos()){
+			return;
+		}
+		objects[index]->Translate(Lerp(objects[index]->GetPos(), newMove, time) - objects[index]->GetPos(), true);
+	}
 }
 
-void Game::MoveObjectTime(int index, Vector3 newMove, float time) {
-	objects[index]->Translate(Lerp(objects[index]->GetPos(true), newMove, time));
+void Game::MoveObjectTime(int index, Vector3 newMove, float time, bool relative){
+	if(relative){
+		if(newMove == VECTOR3_ZERO){
+			return;
+		}
+		objects[index]->Translate(Lerp(VECTOR3_ZERO, newMove, time), true);
+	}
+	else {
+		//TODO: WORK WITH NON-RELATIVE SPACE
+		if(newMove == objects[index]->GetPos()){
+			return;
+		}
+		objects[index]->Translate(Lerp(objects[index]->GetPos(), newMove, time) - objects[index]->GetPos(), true);
+	}
 }
 
 void Game::RotateObjectTime(std::string partName, Vector3 newRot, float time){
@@ -814,6 +843,15 @@ void Game::RotateObjectTime(std::string partName, Vector3 newRot, float time){
 
 void Game::RotateObjectTime(int index, Vector3 newRot, float time){
 	objects[index]->Rotate(Lerp(objects[index]->GetRot(true), newRot, time));
+}
+
+void Game::ScaleObjectTime(std::string partName, Vector3 newScale, float time) {
+	int index = FindIndex(partName);
+	objects[index]->Scale(Lerp(objects[index]->GetScale(true), newScale, time));
+}
+
+void Game::ScaleObjectTime(int index, Vector3 newScale, float time){
+	objects[index]->Scale(Lerp(objects[index]->GetScale(true), newScale, time));
 }
 
 void Game::KeyboardInput(unsigned char key, int x, int y){

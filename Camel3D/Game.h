@@ -72,11 +72,13 @@ class Game {
 		void DrawFBO(std::string name);
 		GameObject* FindObject(std::string name);
 		int FindIndex(std::string name);
-		void MoveObjectTime(std::string partName, Vector3 newMove, float time);
+		void MoveObjectTime(std::string partName, Vector3 newMove, float time, bool relative=true);
+		void MoveObjectTime(int index, Vector3 newMove, float time, bool relative = true);
 		void RotateObjectTime(std::string partName, Vector3 newRot, float time);
-		void MoveObjectTime(int index, Vector3 newMove, float time);
 		void RotateObjectTime(int index, Vector3 newRot, float time);
-		void Animate(Clip<Transform>* clip);
+		void ScaleObjectTime(std::string partName, Vector3 newScale, float time);
+		void ScaleObjectTime(int index, Vector3 newScale, float time);
+		void Animate(Clip<Transform>* clip, bool relative=false);
 
 	private:
 		Game();

@@ -22,12 +22,14 @@ class GameObject {
 		void Translate(float x, float y, float z, bool relative = false);
 		void Rotate(Vector3 rot, bool relative = false);
 		void Rotate(float x, float y, float z, bool relative = false);
+		void Scale(Vector3 scale, bool relative = false);
+		void Scale(float x, float y, float z, bool relative = false);
 		void SetChild(GameObject* obj);
 		void TranslateFromParent();
 		std::vector<GameObject*> GetChildren(){return children;}
 		Vector3 GetPos(bool relative = false);
 		Vector3 GetRot(bool relative = false);
-		Vector3* GetScale(){return scale;}
+		Vector3 GetScale(bool relative = false);
 		void SetColor(Vector3 color);
 		GameObject* GetParent(){return parent;};
 		ObjLoader* OBJLoad(char* filename, ObjLoader* obj);

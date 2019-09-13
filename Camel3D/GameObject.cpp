@@ -180,7 +180,6 @@ void GameObject::TranslateFromParent(){
 	if(parent != nullptr){
 		parent->TranslateFromParent();
 	}
-
 	glTranslatef(pos->x, pos->y, pos->z);
 	glRotatef(rot->x, 1, 0, 0);
 	glRotatef(rot->y, 0, 1, 0);
@@ -260,11 +259,19 @@ Vector3 GameObject::GetPos(bool relative){
 }
 
 Vector3 GameObject::GetRot(bool relative){
-	if (relative) return *rot;
-	if (parent != nullptr) {
+	if(relative) return *rot;
+	if(parent != nullptr){
 		return parent->GetRot().operator+(*rot);
 	}
 	else return *rot;
+}
+
+Vector3 GameObject::GetScale(bool relative){
+	if(relative) return *scale;
+	if(parent != nullptr){
+		return parent->GetScale().operator+(*scale);
+	}
+	else return *scale;
 }
 
 void GameObject::Translate(Vector3 newPos, bool relative){
@@ -316,6 +323,30 @@ void GameObject::Rotate(Vector3 newRot, bool relative){
 	else {
 		delete rot;
 		rot = new Vector3(newRot.x, newRot.y, newRot.z);
+	}
+}
+
+
+void GameObject::Scale(Vector3 newScale, bool relative){
+	if(relative){
+		Vector3* scaleTwo = new Vector3(newScale.x + scale->x, newScale.y + scale->y, newScale.z + scale->z);
+		delete scale;
+		scale = scaleTwo;
+	}
+	else {
+		delete scale;
+		scale = new Vector3(newScale.x, newScale.y, newScale.z);
+	}
+}
+void GameObject::Scale(float x, float y, float z, bool relative){
+	if (relative) {
+		Vector3* scaleTwo = new Vector3(x + scale->x, y + scale->y, z + scale->z);
+		delete scale;
+		scale = scaleTwo;
+	}
+	else {
+		delete scale;
+		scale = new Vector3(x, y, z);
 	}
 }
 
