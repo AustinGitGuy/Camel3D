@@ -137,7 +137,7 @@ void Game::Init(int width, int height){
 
 	auto it = std::next(starting->keys.begin(), 0);
 
-	//Working in relative space. Convert from physical space beforehand if you want to do that.
+	//Working in relative space. Convert from world space beforehand if you want to do that.
 	for(int i = 0; i < SKELE_PARTS; i++){
 		it->data[i].objName = objects[FindIndex("SkeleRoot") + i]->name;
 		it->data[i].pos = objects[FindIndex("SkeleRoot") + i]->GetPos();
@@ -146,7 +146,6 @@ void Game::Init(int width, int height){
 	}
 
 	it->data[0].pos = Vector3(-1.5f, 3.1, -6);
-	it->data[0].scale = Vector3(1.2, 1.2, 1.2);
 
 	it->data[6].rot = Vector3(0, 0, -69);
 	it->data[7].rot = Vector3(0, 0, -140);
@@ -159,8 +158,6 @@ void Game::Init(int width, int height){
 		it->data[i].rot = VECTOR3_ZERO;
 		it->data[i].scale = VECTOR3_ONE;
 	}
-
-	it->data[0].scale = Vector3(1, 1, 1);
 
 	it->data[6].rot = Vector3(-.2f, .2f, 0);
 	it->data[7].rot = Vector3(-.65f, -.5f, 0);
@@ -327,6 +324,7 @@ void Game::Animate(Clip<Transform>* clip, bool relative){
 				//TODO: Scale
 				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, starting->elapsedTime / 100, relative);
 				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, starting->elapsedTime / 100);
+				ScaleObjectTime(FindIndex(it->data[i].objName), it->data[i].scale, starting->elapsedTime / 100);
 			}
 		}
 		else if (starting->index + 1 == starting->keys.size()) {
@@ -348,6 +346,7 @@ void Game::Animate(Clip<Transform>* clip, bool relative){
 				//TODO: Scale
 				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, (it->loadupTime - starting->elapsedTime) / 100, relative);
 				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, (it->loadupTime - starting->elapsedTime) / 100);
+				ScaleObjectTime(FindIndex(it->data[i].objName), it->data[i].scale, (it->loadupTime - starting->elapsedTime) / 100);
 			}
 		}
 		else if (it == starting->keys.begin()) {
@@ -851,6 +850,7 @@ void Game::ScaleObjectTime(std::string partName, Vector3 newScale, float time) {
 }
 
 void Game::ScaleObjectTime(int index, Vector3 newScale, float time){
+	newScale *= objects[index]->GetScale(true);
 	objects[index]->Scale(Lerp(objects[index]->GetScale(true), newScale, time));
 }
 

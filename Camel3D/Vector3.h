@@ -6,6 +6,7 @@ public:
 
 	Vector3& operator += (const Vector3& mth);
 	Vector3& operator -= (const Vector3& mth);
+	Vector3& operator *= (const Vector3& mth);
 	Vector3& operator *= (float mth);
 	Vector3& operator /= (float mth);
 	Vector3& operator = (const Vector3& mth);
