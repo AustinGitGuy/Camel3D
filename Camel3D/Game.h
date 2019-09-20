@@ -79,6 +79,14 @@ class Game {
 		void ScaleObjectTime(std::string partName, Vector3 newScale, float time);
 		void ScaleObjectTime(int index, Vector3 newScale, float time);
 		void Animate(Clip<Transform>* clip);
+		template<class T>
+		void StopAnimation(Clip<T>* clip);
+		template<class T>
+		void StartAnimation(Clip<T>* clip);
+		template<class T>
+		void SwitchForward(Clip<T>* clip);
+		template<class T>
+		void SwitchReverse(Clip<T>* clip);
 
 	private:
 		Game();

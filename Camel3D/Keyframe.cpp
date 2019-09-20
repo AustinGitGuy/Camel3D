@@ -3,10 +3,11 @@
 #include "Game.h"
 
 template<class T>
-Keyframe<T>::Keyframe(T* toPass, float time, bool array){
+Keyframe<T>::Keyframe(T* toPass, float time, int sizeOfArray, bool array){
 	data = toPass;
 	isArray = array;
 	loadupTime = time;
+	arraySize = sizeOfArray;
 }
 
 template<class T>
@@ -14,6 +15,7 @@ Keyframe<T>::Keyframe(int arrayPoints, float time){
 	data = new T[arrayPoints];
 	isArray = true;
 	loadupTime = time;
+	arraySize = arrayPoints;
 }
 
 template<class T>
@@ -21,6 +23,7 @@ Keyframe<T>::Keyframe(float time){
 	data = new T;
 	isArray = false;
 	loadupTime = time;
+	arraySize = 0;
 }
 
 template<class T>

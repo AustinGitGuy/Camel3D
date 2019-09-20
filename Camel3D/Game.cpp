@@ -234,8 +234,6 @@ void Game::Init(int width, int height){
 
 	currentProgram = "defaultProgram";
 	inited = true;
-	
-	std::cout << (Vector3(5, 5, 5) / 5).x << " " << (Vector3(5, 5, 5) / 5).y << " " << (Vector3(5, 5, 5) / 5).z;
 }
 
 void Game::Cleanup(){
@@ -321,8 +319,7 @@ void Game::Animate(Clip<Transform>* clip){
 		break;
 	case 1:
 		if(clip->elapsedTime <= it->loadupTime){
-			//TODO: Change this to array later
-			for(int i = 0; i < SKELE_PARTS; i++){
+			for(int i = 0; i < it->arraySize; i++){
 				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, starting->elapsedTime / 100, clip->posRelative);
 				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, starting->elapsedTime / 100);
 				ScaleObjectTime(FindIndex(it->data[i].objName), it->data[i].scale, starting->elapsedTime / 100);
@@ -330,7 +327,7 @@ void Game::Animate(Clip<Transform>* clip){
 		}
 		else if (starting->index + 1 == starting->keys.size()){
 			starting->dir = starting->Reverse;
-			if (starting->keys.size() > 1) {
+			if(starting->keys.size() > 1){
 				starting->index = starting->keys.size() - 2;
 			}
 			it = std::next(starting->keys.begin(), starting->index);
@@ -343,7 +340,7 @@ void Game::Animate(Clip<Transform>* clip){
 		break;
 	case -1:
 		if (starting->elapsedTime > 0){
-			for (int i = 0; i < SKELE_PARTS; i++){
+			for (int i = 0; i < it->arraySize; i++){
 				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, (it->loadupTime - starting->elapsedTime) / 100, clip->posRelative);
 				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, (it->loadupTime - starting->elapsedTime) / 100);
 				ScaleObjectTime(FindIndex(it->data[i].objName), it->data[i].scale, (it->loadupTime - starting->elapsedTime) / 100);
@@ -352,7 +349,7 @@ void Game::Animate(Clip<Transform>* clip){
 		else if (it == starting->keys.begin()){
 			starting->dir = starting->Forward;
 			starting->elapsedTime = 0;
-			if (starting->keys.size() != 1) {
+			if(starting->keys.size() != 1){
 				starting->index = 1;
 			}
 		}
@@ -362,6 +359,36 @@ void Game::Animate(Clip<Transform>* clip){
 			starting->elapsedTime = it->loadupTime;
 		}
 		break;
+	}
+}
+
+template<class T>
+void Game::StopAnimation(Clip<T>* clip){
+	clip->dir = clip->Stop;
+}
+
+template<class T>
+void Game::StartAnimation(Clip<T>* clip){
+	clip->dir = clip->Forward;
+}
+
+template<class T>
+void Game::SwitchForward(Clip<T>* clip){
+	if(clip->dir != clip->Stop){
+		clip->dir = clip->Stop;
+	}
+	else {
+		clip->dir = clip->Forward;
+	}
+}
+
+template<class T>
+void Game::SwitchReverse(Clip<T>* clip){
+	if(clip->dir != clip->Stop){
+		clip->dir = clip->Stop;
+	}
+	else {
+		clip->dir = clip->Reverse;
 	}
 }
 
@@ -481,6 +508,7 @@ void Game::Display(){
 					DrawText(Vector3(10.0f, (float)(screenHeight - 240), 0.0f), red, "Enter to change shader");
 					DrawText(Vector3(10.0f, (float)(screenHeight - 260), 0.0f), red, "WASD to control camera movement");
 					DrawText(Vector3(10.0f, (float)(screenHeight - 280), 0.0f), red, "c to draw colliders");
+					DrawText(Vector3(10.0f, (float)(screenHeight - 300), 0.0f), red, "z to start/stop. x to reverse/stop");
 				}
 			}
 			else {
@@ -811,7 +839,6 @@ void Game::MoveObjectTime(std::string partName, Vector3 newMove, float time, boo
 		objects[index]->Translate(Lerp(VECTOR3_ZERO, newMove, time), true);
 	}
 	else {
-		//TODO: WORK WITH NON-RELATIVE SPACE
 		if(newMove == objects[index]->GetPos()){
 			return;
 		}
@@ -827,7 +854,6 @@ void Game::MoveObjectTime(int index, Vector3 newMove, float time, bool relative)
 		objects[index]->Translate(Lerp(VECTOR3_ZERO, newMove, time), true);
 	}
 	else {
-		//TODO: WORK WITH NON-RELATIVE SPACE
 		if(newMove == objects[index]->GetPos()){
 			return;
 		}
@@ -988,7 +1014,16 @@ void Game::KeyboardInput(unsigned char key, int x, int y){
 	case '/':
 		snap = true;
 		currentProgram = "SnapProgram";
+		break;
 
+	//z switches from stop/forward
+	case 'z':
+		SwitchForward(starting);
+		break;
+	//x switches from stop/reverse
+	case 'x':
+		SwitchReverse(starting);
+		break;
 	default:
 		break;
 	}

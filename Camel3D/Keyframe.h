@@ -8,7 +8,7 @@ template<class T>
 class Keyframe {
 	public:
 		//Ownership will be passed to the Keyframe class
-		Keyframe(T* toPass, float time, bool array = true);
+		Keyframe(T* toPass, float time, int sizeOfArray, bool array = true);
 		//If you want an array of points
 		Keyframe(int arrayPoints, float time);
 		//If you want a single datapoint
@@ -20,6 +20,7 @@ class Keyframe {
 
 		T* data;
 		float loadupTime;
+		int arraySize;
 
 	private:
 		//Datapoints to pass
