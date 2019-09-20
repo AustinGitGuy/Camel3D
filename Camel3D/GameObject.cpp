@@ -302,6 +302,18 @@ void GameObject::Translate(float x, float y, float z, bool relative){
 	if(col) col->RegenerateCollider(pos, size);
 }
 
+void GameObject::TranslateChildren(float x, float y, float z, bool relative){
+	for(int i = 0; i < children.size(); i++){
+		children[i]->Translate(x, y, z, relative);
+	}
+}
+
+void GameObject::TranslateChildren(Vector3 pos, bool relative){
+	for (int i = 0; i < children.size(); i++) {
+		children[i]->Translate(pos, relative);
+	}
+}
+
 void GameObject::Rotate(float x, float y, float z, bool relative){
 	if(relative){
 		Vector3* rotTwo = new Vector3(x + pos->x, y + pos->y, z + pos->z);

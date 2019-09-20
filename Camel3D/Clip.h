@@ -18,6 +18,8 @@ class Clip {
 		direction dir;
 		float index;
 		std::list<Keyframe<T>> keys;
+
+		bool posRelative = true;
 	private:
 		
 };

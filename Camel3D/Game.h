@@ -78,7 +78,7 @@ class Game {
 		void RotateObjectTime(int index, Vector3 newRot, float time);
 		void ScaleObjectTime(std::string partName, Vector3 newScale, float time);
 		void ScaleObjectTime(int index, Vector3 newScale, float time);
-		void Animate(Clip<Transform>* clip, bool relative=false);
+		void Animate(Clip<Transform>* clip);
 
 	private:
 		Game();

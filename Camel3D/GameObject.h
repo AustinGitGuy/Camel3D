@@ -20,6 +20,8 @@ class GameObject {
 		void Draw();
 		void Translate(Vector3 pos, bool relative = false);
 		void Translate(float x, float y, float z, bool relative = false);
+		void TranslateChildren(float x, float y, float z, bool relative = false);
+		void TranslateChildren(Vector3 pos, bool relative = false);
 		void Rotate(Vector3 rot, bool relative = false);
 		void Rotate(float x, float y, float z, bool relative = false);
 		void Scale(Vector3 scale, bool relative = false);
