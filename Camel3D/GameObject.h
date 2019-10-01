@@ -18,8 +18,8 @@ class GameObject {
 		GameObject(GameObject* one, GameObject* two);
 		~GameObject();
 		void Draw();
-		void Translate(Vector3 pos, bool relative = false);
-		void Translate(float x, float y, float z, bool relative = false);
+		void Translate(Vector3 pos, bool relative = false, bool tOverride = false);
+		void Translate(float x, float y, float z, bool relative = false, bool tOverride = false);
 		void TranslateChildren(float x, float y, float z, bool relative = false);
 		void TranslateChildren(Vector3 pos, bool relative = false);
 		void Rotate(Vector3 rot, bool relative = false);
@@ -28,6 +28,10 @@ class GameObject {
 		void Scale(float x, float y, float z, bool relative = false);
 		void SetChild(GameObject* obj);
 		void TranslateFromParent();
+		void SetCanRotate(bool newRotate);
+		void SetCanTranslate(bool newTranslate);
+		bool GetCanRotate();
+		bool GetCanTranslate();
 		std::vector<GameObject*> GetChildren(){return children;}
 		Vector3 GetPos(bool relative = false);
 		Vector3 GetRot(bool relative = false);
@@ -60,6 +64,8 @@ class GameObject {
 		float* vertexData;
 		unsigned int mode;
 		int vertexSize;
+
+		bool canTranslate = true, canRotate = true;
 
 		GameObject* connectionOne;
 		GameObject* connectionTwo;

@@ -274,7 +274,8 @@ Vector3 GameObject::GetScale(bool relative){
 	else return *scale;
 }
 
-void GameObject::Translate(Vector3 newPos, bool relative){
+void GameObject::Translate(Vector3 newPos, bool relative, bool tOverride){
+	if(!canTranslate && !tOverride) return;
 	if(relative){
 		Vector3* posTwo = new Vector3(newPos.x + pos->x, newPos.y + pos->y, newPos.z + pos->z);
 		delete pos;
@@ -288,7 +289,8 @@ void GameObject::Translate(Vector3 newPos, bool relative){
 	if(col) col->RegenerateCollider(pos, size);
 }
 
-void GameObject::Translate(float x, float y, float z, bool relative){
+void GameObject::Translate(float x, float y, float z, bool relative, bool tOverride){
+	if(!canTranslate && !tOverride) return;
 	if(relative){
 		Vector3* posTwo = new Vector3(x + pos->x, y + pos->y, z + pos->z);
 		delete pos;
@@ -304,17 +306,18 @@ void GameObject::Translate(float x, float y, float z, bool relative){
 
 void GameObject::TranslateChildren(float x, float y, float z, bool relative){
 	for(int i = 0; i < children.size(); i++){
-		children[i]->Translate(x, y, z, relative);
+		children[i]->Translate(x, y, z, relative, true);
 	}
 }
 
 void GameObject::TranslateChildren(Vector3 pos, bool relative){
-	for (int i = 0; i < children.size(); i++) {
-		children[i]->Translate(pos, relative);
+	for(int i = 0; i < children.size(); i++) {
+		children[i]->Translate(pos, relative, true);
 	}
 }
 
 void GameObject::Rotate(float x, float y, float z, bool relative){
+	if(!canRotate) return;
 	if(relative){
 		Vector3* rotTwo = new Vector3(x + pos->x, y + pos->y, z + pos->z);
 		delete rot;
@@ -327,6 +330,7 @@ void GameObject::Rotate(float x, float y, float z, bool relative){
 }
 
 void GameObject::Rotate(Vector3 newRot, bool relative){
+	if(!canRotate) return;
 	if(relative){
 		Vector3* rotTwo = new Vector3(newRot.x + rot->x, newRot.y + rot->y, newRot.z + rot->z);
 		delete rot;
@@ -370,6 +374,22 @@ void GameObject::SetColor(Vector3 newColor){
 	delete[] color;
 
 	color = new Vector3(newColor.x, newColor.y, newColor.z);
+}
+
+void GameObject::SetCanRotate(bool newRotate){
+	canRotate = newRotate;
+}
+
+void GameObject::SetCanTranslate(bool newTranslate){
+	canTranslate = newTranslate;
+}
+
+bool GameObject::GetCanRotate(){
+	return canRotate;
+}
+
+bool GameObject::GetCanTranslate(){
+	return canTranslate;
 }
 
 ObjLoader* GameObject::OBJLoad(char* filename, ObjLoader* obj){

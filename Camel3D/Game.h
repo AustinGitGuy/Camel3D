@@ -30,6 +30,13 @@ struct Transform {
 	std::string objName;
 };
 
+struct Skeleton {
+	std::vector<GameObject*> parts;
+	std::vector<GameObject*> connectors;
+};
+
+enum SkeletonJoint {   };
+
 class Game {
 
 	public:
@@ -54,7 +61,8 @@ class Game {
 		void NewObject(GameObject::Type newType, char* filename, Vector3 newColor, Vector3 newPos, Vector3 newScale, Vector3 newRot, std::string name, bool isStatic, bool hasCollider = true);
 		void NewObject(GameObject::Type newType, Vector3 newColor, Vector3 newPos, Vector3 newScale, Vector3 newRot, std::string name, GameObject* parent, bool isStatic, bool hasCollider = true);
 		void NewObject(Vector3 newPos, Vector3 newScale, Vector3 newRot, std::string newName);
-		void NewSkeletonPart(Vector3 newPos, Vector3 newRot, std::string name, GameObject* parent = nullptr);
+		void NewSkeletonPart(Vector3 newPos, Vector3 newRot, std::string name, std::string skeleName, GameObject* parent = nullptr);
+		void NewSkeletonPart(Vector3 newPos, Vector3 newRot, std::string name, std::string skeleName, GameObject* parent, bool canTranslate, bool canRotate);
 		void NewObject(GameObject* one, GameObject* two);
 		void NewCamera(Vector3 pos, Vector3 direction);
 		void CreateProgram(std::string name, bool oneDraw = false);	
@@ -72,6 +80,7 @@ class Game {
 		void DrawFBO(std::string name);
 		GameObject* FindObject(std::string name);
 		int FindIndex(std::string name);
+		int FindIndexSkeleton(std::string partName, std::string skeleName);
 		void MoveObjectTime(std::string partName, Vector3 newMove, float time, bool relative=true);
 		void MoveObjectTime(int index, Vector3 newMove, float time, bool relative = true);
 		void RotateObjectTime(std::string partName, Vector3 newRot, float time);
@@ -106,9 +115,11 @@ class Game {
 		int screenWidth;
 		int screenHeight;
 
-		std::vector<GameObject*>objects;
-		std::vector<GameObject*>connectors;
+		std::vector<GameObject*> objects;
+		std::vector<GameObject*> connectors;
 		std::vector<Camera*> cameras;
+
+		std::map<std::string, Skeleton> skeletons;
 
 		int cameraIndex = 0;
 		int objectIndex = 0;
