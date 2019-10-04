@@ -81,12 +81,13 @@ class Game {
 		GameObject* FindObject(std::string name);
 		int FindIndex(std::string name);
 		int FindIndexSkeleton(std::string partName, std::string skeleName);
-		void MoveObjectTime(std::string partName, Vector3 newMove, float time, bool relative=true);
 		void MoveObjectTime(int index, Vector3 newMove, float time, bool relative = true);
-		void RotateObjectTime(std::string partName, Vector3 newRot, float time);
+		void MoveObjectTime(int index, Vector3 newMove, float time, std::string skeleName, bool relative = true);
 		void RotateObjectTime(int index, Vector3 newRot, float time);
-		void ScaleObjectTime(std::string partName, Vector3 newScale, float time);
+		void RotateObjectTime(int index, Vector3 newRot, std::string skeleName, float time);
 		void ScaleObjectTime(int index, Vector3 newScale, float time);
+		void ScaleObjectTime(int index, Vector3 newScale, std::string skeleName, float time);
+		void Animate(Clip<Transform>* clip, std::string skeleName);
 		void Animate(Clip<Transform>* clip);
 		template<class T>
 		void StopAnimation(Clip<T>* clip);

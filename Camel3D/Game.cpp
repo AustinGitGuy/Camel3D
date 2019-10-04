@@ -300,7 +300,7 @@ void Game::DrawFBO(std::string name){
 }
 
 void Game::Update(){
-	//Animate(starting);
+	Animate(starting, "BasicSkele");
 	if(snap){
 		snapTime += deltaTime;
 		glUseProgram(programs["SnapProgram"].id);
@@ -314,7 +314,7 @@ void Game::Update(){
 
 //TODO: FIX ANIMATION
 //Animate a transform clip
-void Game::Animate(Clip<Transform>* clip){
+void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 	auto it = std::next(clip->keys.begin(), clip->index);
 	switch(clip->dir){
 	case 0:
@@ -322,9 +322,9 @@ void Game::Animate(Clip<Transform>* clip){
 	case 1:
 		if(clip->elapsedTime <= it->loadupTime){
 			for(int i = 0; i < it->arraySize; i++){
-				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, starting->elapsedTime / 100, clip->posRelative);
-				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, starting->elapsedTime / 100);
-				ScaleObjectTime(FindIndex(it->data[i].objName), it->data[i].scale, starting->elapsedTime / 100);
+				MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].pos, starting->elapsedTime / 100, skeleName, clip->posRelative);
+				RotateObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].rot, skeleName, starting->elapsedTime / 100);
+				ScaleObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].scale, skeleName, starting->elapsedTime / 100);
 			}
 		}
 		else if (starting->index + 1 == starting->keys.size()){
@@ -343,9 +343,9 @@ void Game::Animate(Clip<Transform>* clip){
 	case -1:
 		if (starting->elapsedTime > 0){
 			for (int i = 0; i < it->arraySize; i++){
-				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, (it->loadupTime - starting->elapsedTime) / 100, clip->posRelative);
-				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, (it->loadupTime - starting->elapsedTime) / 100);
-				ScaleObjectTime(FindIndex(it->data[i].objName), it->data[i].scale, (it->loadupTime - starting->elapsedTime) / 100);
+				MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].pos, (it->loadupTime - starting->elapsedTime) / 100, skeleName, clip->posRelative);
+				RotateObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].rot, skeleName, (it->loadupTime - starting->elapsedTime) / 100);
+				ScaleObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].scale, skeleName, (it->loadupTime - starting->elapsedTime) / 100);
 			}
 		}
 		else if (it == starting->keys.begin()){
@@ -847,22 +847,6 @@ void Game::SpecialKeyboard(int key, int x, int y){
 	}
 }
 
-void Game::MoveObjectTime(std::string partName, Vector3 newMove, float time, bool relative){
-	int index = FindIndex(partName);
-	if(relative){
-		if(newMove == VECTOR3_ZERO){
-			return;
-		}
-		objects[index]->Translate(Lerp(VECTOR3_ZERO, newMove, time), true);
-	}
-	else {
-		if(newMove == objects[index]->GetPos()){
-			return;
-		}
-		objects[index]->Translate(Lerp(objects[index]->GetPos(), newMove, time) - objects[index]->GetPos(), true);
-	}
-}
-
 void Game::MoveObjectTime(int index, Vector3 newMove, float time, bool relative){
 	if(relative){
 		if(newMove == VECTOR3_ZERO){
@@ -878,23 +862,37 @@ void Game::MoveObjectTime(int index, Vector3 newMove, float time, bool relative)
 	}
 }
 
-void Game::RotateObjectTime(std::string partName, Vector3 newRot, float time){
-	int index = FindIndex(partName);
-	objects[index]->Rotate(Lerp(objects[index]->GetRot(true), newRot, time));
+void Game::MoveObjectTime(int index, Vector3 newMove, float time, std::string skeleName, bool relative){
+	if(relative){
+		if(newMove == VECTOR3_ZERO){
+			return;
+		}
+		skeletons[skeleName].parts[index]->Translate(Lerp(VECTOR3_ZERO, newMove, time), true);
+	}
+	else {
+		if(newMove == objects[index]->GetPos()){
+			return;
+		}
+		skeletons[skeleName].parts[index]->Translate(Lerp(skeletons[skeleName].parts[index]->GetPos(), newMove, time) - skeletons[skeleName].parts[index]->GetPos(), true);
+	}
 }
 
 void Game::RotateObjectTime(int index, Vector3 newRot, float time){
 	objects[index]->Rotate(Lerp(objects[index]->GetRot(true), newRot, time));
 }
 
-void Game::ScaleObjectTime(std::string partName, Vector3 newScale, float time) {
-	int index = FindIndex(partName);
-	objects[index]->Scale(Lerp(objects[index]->GetScale(true), newScale, time));
+void Game::RotateObjectTime(int index, Vector3 newRot, std::string skeleName, float time){
+	skeletons[skeleName].parts[index]->Rotate(Lerp(skeletons[skeleName].parts[index]->GetRot(true), newRot, time));
 }
 
 void Game::ScaleObjectTime(int index, Vector3 newScale, float time){
 	newScale *= objects[index]->GetScale(true);
 	objects[index]->Scale(Lerp(objects[index]->GetScale(true), newScale, time));
+}
+
+void Game::ScaleObjectTime(int index, Vector3 newScale, std::string skeleName, float time){
+	newScale *= skeletons[skeleName].parts[index]->GetScale(true);
+	skeletons[skeleName].parts[index]->Scale(Lerp(skeletons[skeleName].parts[index]->GetScale(true), newScale, time));
 }
 
 void Game::KeyboardInput(unsigned char key, int x, int y){
