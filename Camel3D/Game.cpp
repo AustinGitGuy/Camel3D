@@ -16,8 +16,7 @@
 #include "Camera.h"
 #include "BoxCollider.h"
 #include <time.h>
-#include "IL/ilut.h"
-#include "IL/ilu.h"
+#include "FreeImage.h"
 
 Game* Game::instance = NULL;
 int Game::msID = 0;
@@ -81,10 +80,6 @@ void Game::Init(int width, int height){
 		std::cout << "Error: " << glewGetErrorString(err) << std::endl;
 	}
 	std::cout << "Using GLEW: " << glewGetString(GLEW_VERSION) << std::endl;
-
-	ilInit();
-
-	ilutRenderer(ILUT_OPENGL);
 
 	std::string filename = "diver.obj";
 
@@ -150,6 +145,16 @@ void Game::Init(int width, int height){
 	it->data[6].rot = Vector3(0, 0, -69);
 	it->data[7].rot = Vector3(0, 0, -140);
 
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_NORMALIZE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glEnable(GL_TEXTURE_2D);
+
 	//Generate FBOS
 	CreateBasicFBO("offscreen");
 	CreateTexture("terrain.bmp", "terrain");
@@ -163,7 +168,7 @@ void Game::Init(int width, int height){
 	LinkProgram("defaultProgram");
 	CompileShader("defaultProgram");
 
-	CreateProgram("noiseProgram", true);
+	CreateProgram("noiseProgram");
 	CreateShader("noiseProgram-vert", "NoiseVertex.glsl", GL_VERTEX_SHADER);
 	CreateShader("noiseProgram-frag", "NoiseFragment.glsl", GL_FRAGMENT_SHADER);
 	AttachShader("noiseProgram", "noiseProgram-vert", "noiseProgram-frag");
@@ -178,10 +183,6 @@ void Game::Init(int width, int height){
 
 	glEnableVertexAttribArray(texCoordLoc);
 	glVertexAttribPointer(texCoordLoc, 2, GL_FLOAT, 0, 0, 0);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_MULTISAMPLE);
 
 	CreateProgram("blueProgram");
 	CreateShader("blueProgram-vert", "vertex3.glsl", GL_VERTEX_SHADER);
@@ -286,15 +287,118 @@ void Game::DrawFBO(std::string name){
 
 void Game::Update(){
 	Animate(starting, "BasicSkele");
-	if(snap){
-		snapTime += deltaTime;
-		glUseProgram(programs["SnapProgram"].id);
-		GLint loc = glGetUniformLocation(programs["SnapProgram"].id, "uTime");
-		glUniform1f(loc, snapTime);
-	}
 
 	starting->elapsedTime += deltaTime * starting->dir;
 	timeElapsed += deltaTime;
+}
+
+void Game::Display(){
+
+	oldTime = newTime;
+	newTime = time(NULL);
+	deltaTime = newTime - oldTime;
+
+	for(int i = 0; i < PASS_NUM; i++){
+		//Pass 1: Draw the objects (except for onedraw and snap)
+		if(i == 0){
+			glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glMatrixMode(GL_MODELVIEW);
+
+			glUseProgram(programs[currentProgram].id);
+
+			if(textures["terrain"].data){
+				int format = (FI_RGBA_RED == 0) ? GL_RGB : GL_BGR;
+				glEnable(GL_TEXTURE_2D);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textures["terrain"].width, textures["terrain"].height, 
+							 0, format, GL_UNSIGNED_BYTE, textures["terrain"].data);
+			}
+			else {
+				glDisable(GL_TEXTURE_2D);
+			}
+
+			for(unsigned int c = 0; c < objects.size(); c++){
+				ResetPosition();
+				objects[c]->Draw();
+			}
+			for(unsigned int c = 0; c < connectors.size(); c++){
+				ResetPosition();
+				connectors[c]->Draw();
+			}
+			for(std::map<std::string, Skeleton>::iterator it = skeletons.begin(); it != skeletons.end(); ++it){
+				//Draw the skeleton
+				for(int j = 0; j < it->second.parts.size(); j++){
+					ResetPosition();
+					it->second.parts[j]->Draw();
+				}
+				for(int j = 0; j < it->second.connectors.size(); j++){
+					ResetPosition();
+					it->second.connectors[j]->Draw();
+				}
+			}
+		}
+		//Pass Almost Max: Draw Colliders
+		if(i == PASS_NUM - 2){
+			DrawFBO("offscreen");
+			glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
+			glUseProgram(programs["defaultProgram"].id);
+			if(drawColliders){
+				for(unsigned int c = 0; c < objects.size(); c++){
+					ResetPosition();
+					if(objects[c]->GetCollider() != nullptr){
+						if(objects[c]->GetParent() != nullptr){
+							objects[c]->GetParent()->TranslateFromParent();
+						}
+						objects[c]->GetCollider()->DrawCollider();
+					}
+				}
+			}
+		}
+		//Pass Max: Draw Text
+		if(i == PASS_NUM - 1){
+			DrawFBO("offscreen");
+			glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
+			glUseProgram(programs["defaultProgram"].id);
+
+			DrawText(Vector3(10.0f, (float)(screenHeight - 20), 0.0f), red, "Current selected object: " + objects[objectIndex]->name);
+			DrawText(Vector3(10.0f, (float)(screenHeight - 40), 0.0f), red, "Current Shader: " + currentProgram);
+
+			if(!showInfo){
+				DrawText(Vector3(10.0f, (float)(screenHeight - 60), 0.0f), red, "Press i to show controls");
+			}
+			else {
+				DrawText(Vector3(10.0f, (float)(screenHeight - 60), 0.0f), red, "Press i to hide controls");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 80), 0.0f), red, "1, 2, 3 to control X, Y, Z.");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 100), 0.0f), red, "Current X, Y, Z Position: " + std::to_string(objects[objectIndex]->GetPos().x) + ", " +
+						 std::to_string(objects[objectIndex]->GetPos().y) + ", " + std::to_string(objects[objectIndex]->GetPos().z));
+				DrawText(Vector3(10.0f, (float)(screenHeight - 120), 0.0f), red, "!, @, # to control -X, -Y, -Z");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 140), 0.0f), red, "4, 5, 6 to control rotational X, Y, Z");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 160), 0.0f), red, "Current X, Y, Z Rotation: " + std::to_string(objects[objectIndex]->GetRot().x) + ", " +
+						 std::to_string(objects[objectIndex]->GetRot().y) + ", " + std::to_string(objects[objectIndex]->GetRot().z));
+				DrawText(Vector3(10.0f, (float)(screenHeight - 180), 0.0f), red, "$, %, ^ to control rotational -X, -Y, -Z");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 200), 0.0f), red, "Up/Down to select objects");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 220), 0.0f), red, "Right/Left to select cameras");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 240), 0.0f), red, "Enter to change shader");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 260), 0.0f), red, "WASD to control camera movement");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 280), 0.0f), red, "c to draw colliders");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 300), 0.0f), red, "z to start/stop. x to reverse/stop");
+				if(starting->dir == -1){
+					DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Reverse. Time elapsed: " + std::to_string(starting->elapsedTime));
+				}
+				else if(starting->dir == 0){
+					DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Stopped. Time elapsed: " + std::to_string(starting->elapsedTime));
+				}
+				else if (starting->dir == 1){
+					DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Forward. Time elapsed: " + std::to_string(starting->elapsedTime));
+				}
+			}
+		}
+	}
+
+	DrawFBO("offscreen");
+
+	glutSwapBuffers();
 }
 
 //Animate a transform clip
@@ -442,160 +546,6 @@ void Game::SwitchReverse(Clip<T>* clip){
 	}
 }
 
-void Game::Display(){
-
-	oldTime = newTime;
-	newTime = time(NULL);
-	deltaTime = newTime - oldTime;
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	for(int i = 0; i < PASS_NUM; i++){
-		//Pass 1: Draw the objects (except for onedraw and snap)
-		if(i == 0){
-			glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			glMatrixMode(GL_MODELVIEW);
-
-			glUseProgram(programs[currentProgram].id);
-
-			if(snap){
-				for(unsigned int c = 0; c < objects.size(); c+=2){
-					ResetPosition();
-					objects[c]->Draw();
-				}
-				for(unsigned int c = 0; c < connectors.size(); c+=2){
-					ResetPosition();
-					connectors[c]->Draw();
-				}
-			}
-			else if(programs[currentProgram].oneDraw){
-				ResetPosition();
-				objects[0]->Draw();
-			}
-			else {
-				for(unsigned int c = 0; c < objects.size(); c++){
-					ResetPosition();
-					objects[c]->Draw();
-				}
-				for(unsigned int c = 0; c < connectors.size(); c++){
-					ResetPosition();
-					connectors[c]->Draw();
-				}
-				for(std::map<std::string, Skeleton>::iterator it = skeletons.begin(); it != skeletons.end(); ++it){
-					//Draw the skeleton
-					for(int j = 0; j < it->second.parts.size(); j++){
-						ResetPosition();
-						it->second.parts[j]->Draw();
-					}
-					for(int j = 0; j < it->second.connectors.size(); j++){
-						ResetPosition();
-						it->second.connectors[j]->Draw();
-					}
-				}
-			}
-		}
-		//Pass 2: If one draw or snap, draw the objects
-		if(i == 1){
-			if(snap){
-				DrawFBO("offscreen");
-				glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
-				glUseProgram(programs["defaultProgram"].id);
-				for(unsigned int c = 1; c < objects.size(); c+=2){
-					ResetPosition();
-					objects[c]->Draw();
-					ResetPosition();
-				}
-				for (unsigned int c = 1; c < connectors.size(); c+=2) {
-					ResetPosition();
-					connectors[c]->Draw();
-				}
-			}
-			if(programs[currentProgram].oneDraw){
-				DrawFBO("offscreen");
-				glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
-				glUseProgram(programs["defaultProgram"].id);
-				for(unsigned int c = 1; c < objects.size(); c++){
-					ResetPosition();
-					objects[c]->Draw();
-					ResetPosition();
-				}
-				for (unsigned int c = 0; c < connectors.size(); c++) {
-					ResetPosition();
-					connectors[c]->Draw();
-				}
-			}
-		}
-		//Pass Almost Max: Draw Colliders
-		if(i == PASS_NUM - 2){
-			DrawFBO("offscreen");
-			glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
-			glUseProgram(programs["defaultProgram"].id);
-			if(drawColliders){
-				for(unsigned int c = 0; c < objects.size(); c++){
-					ResetPosition();
-					if(objects[c]->GetCollider() != nullptr){
-						if(objects[c]->GetParent() != nullptr){
-							objects[c]->GetParent()->TranslateFromParent();
-						}
-						objects[c]->GetCollider()->DrawCollider();
-					}
-				}
-			}
-		}
-		//Pass Max: Draw Text
-		if(i == PASS_NUM - 1){
-			DrawFBO("offscreen");
-			glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
-			glUseProgram(programs["defaultProgram"].id);
-
-			if(!snap){
-				DrawText(Vector3(10.0f, (float)(screenHeight - 20), 0.0f), red, "Current selected object: " + objects[objectIndex]->name);
-				DrawText(Vector3(10.0f, (float)(screenHeight - 40), 0.0f), red, "Current Shader: " + currentProgram);
-
-				if(!showInfo){
-					DrawText(Vector3(10.0f, (float)(screenHeight - 60), 0.0f), red, "Press i to show controls");
-				}
-				else {
-					DrawText(Vector3(10.0f, (float)(screenHeight - 60), 0.0f), red, "Press i to hide controls");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 80), 0.0f), red, "1, 2, 3 to control X, Y, Z.");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 100), 0.0f), red, "Current X, Y, Z Position: " + std::to_string(objects[objectIndex]->GetPos().x) + ", " +
-						std::to_string(objects[objectIndex]->GetPos().y) + ", " + std::to_string(objects[objectIndex]->GetPos().z));
-					DrawText(Vector3(10.0f, (float)(screenHeight - 120), 0.0f), red, "!, @, # to control -X, -Y, -Z");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 140), 0.0f), red, "4, 5, 6 to control rotational X, Y, Z");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 160), 0.0f), red, "Current X, Y, Z Rotation: " + std::to_string(objects[objectIndex]->GetRot().x) + ", " +
-						std::to_string(objects[objectIndex]->GetRot().y) + ", " + std::to_string(objects[objectIndex]->GetRot().z));
-					DrawText(Vector3(10.0f, (float)(screenHeight - 180), 0.0f), red, "$, %, ^ to control rotational -X, -Y, -Z");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 200), 0.0f), red, "Up/Down to select objects");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 220), 0.0f), red, "Right/Left to select cameras");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 240), 0.0f), red, "Enter to change shader");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 260), 0.0f), red, "WASD to control camera movement");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 280), 0.0f), red, "c to draw colliders");
-					DrawText(Vector3(10.0f, (float)(screenHeight - 300), 0.0f), red, "z to start/stop. x to reverse/stop");
-					if(starting->dir == -1){
-						DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Reverse. Time elapsed: " + std::to_string(starting->elapsedTime));
-					}
-					else if(starting->dir == 0){
-						DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Stopped. Time elapsed: " + std::to_string(starting->elapsedTime));
-					}
-					else if (starting->dir == 1){
-						DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Forward. Time elapsed: " + std::to_string(starting->elapsedTime));
-					}
-				}
-			}
-			else {
-				DrawText(Vector3(400, (float)(screenHeight - 20), 0.0f), red, "I hope they'll remember you");
-			}
-		}
-	}
-
-	DrawFBO("offscreen");
-
-	glutSwapBuffers();
-}
-
 void Game::Menu(int id){
 	switch(id){
 	case 1:
@@ -703,17 +653,17 @@ void Game::CleanupInstance(){
 
 void Game::CreateBasicFBO(std::string name){
 	glGenFramebuffers(1, &fbos[name].fbo);
-	glGenTextures(1, &textures[name]);
+	glGenTextures(1, &fbos[name].texture);
 	glGenRenderbuffers(1, &fbos[name].fbo);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbos[name].fbo);
 
-	glBindTexture(GL_TEXTURE_2D, textures[name]);
+	glBindTexture(GL_TEXTURE_2D, fbos[name].texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textures[name], 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbos[name].texture, 0);
 
 	glBindRenderbuffer(GL_RENDERBUFFER, fbos[name].fbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, screenWidth, screenHeight);
@@ -728,54 +678,35 @@ void Game::CreateBasicFBO(std::string name){
 }
 
 void Game::CreateTexture(std::string fileName, std::string texName){
-	unsigned int id;
 
-	glActiveTexture(GL_TEXTURE0 + textureIndex);
-	ilGenImages(1, &id);
-	ilBindImage(id);
-	ilEnable(IL_ORIGIN_SET);
-	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
-	ilLoadImage((ILstring)fileName.c_str());
-	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-	if(&id == 0){
-		std::cout << "ERROR LOADING TEXTURE IMAGE: " << fileName;
+	//Creates bitmap images
+	textures[texName].data = 0;
+
+	FREE_IMAGE_FORMAT format = FreeImage_GetFIFFromFilename(fileName.c_str());
+
+	FIBITMAP* bitmap = FreeImage_Load(format, fileName.c_str(), 0);
+
+	if(!bitmap){
+		std::cout << "Failed to load image: " + fileName << std::endl;
 		return;
 	}
 
-	ilBindImage(id);
+	FIBITMAP* bitmap2 = FreeImage_ConvertTo24Bits(bitmap);
+	FreeImage_Unload(bitmap);
+	textures[texName].data = FreeImage_GetBits(bitmap2);
+	textures[texName].width = FreeImage_GetWidth(bitmap2);
+	textures[texName].height = FreeImage_GetHeight(bitmap2);
+	if(textures[texName].data){
+		std::cout << "Loaded image: " + fileName << std::endl;
+	}
+	else {
+		std::cout << "Failed to get image data: " + fileName << std::endl;
+	}
 
-	glGenTextures(1, &textures[texName]);
-
-	glBindTexture(GL_TEXTURE_2D, textures[texName]); 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	/*
-	glGenFramebuffers(1, &fbos[texName].fbo);
-	glGenRenderbuffers(1, &fbos[texName].fbo);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, fbos[texName].fbo);
-
-	glBindTexture(GL_TEXTURE_2D, textures[fileName]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textures[fileName], 0);
-
-	glBindRenderbuffer(GL_RENDERBUFFER, fbos[fileName].fbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, screenWidth, screenHeight);
-	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbos[fileName].fbo);
-	*/
 }
 
-void Game::CreateProgram(std::string name, bool oneDraw){
+void Game::CreateProgram(std::string name){
 	programs[name].id = glCreateProgram();
-	programs[name].oneDraw = oneDraw;
 	if(programs[name].id == 0){
 		std::cout << "ERROR CREATING SHADER PROGRAM: " + name << std::endl;
 	}
@@ -1064,30 +995,17 @@ void Game::KeyboardInput(unsigned char key, int x, int y){
 
 	//Enter to change shader
 	case '\r':
-		snap = false;
 		it = programs.find(currentProgram);
 		it++;
 		if(it == programs.end()){
 			it = programs.begin();
 		}
 		currentProgram = it->first;
-		if(currentProgram == "SnapProgram"){
-			it = programs.find(currentProgram);
-			it++;
-			if(it == programs.end()){
-				it = programs.begin();
-			}
-		}
 		break;
 
 	//c to draw colliders
 	case 'c':
 		drawColliders = !drawColliders;
-		break;
-		
-	case '/':
-		snap = true;
-		currentProgram = "SnapProgram";
 		break;
 
 	//z switches from stop/forward

@@ -15,12 +15,12 @@ struct Program {
 	std::string fragName;
 	std::string vertName;
 	std::string geoname;
-	bool oneDraw;
 };
 
 struct FBO {
 	GLuint fbo;
 	GLuint depth;
+	GLuint texture;
 };
 
 struct Transform {
@@ -34,6 +34,12 @@ struct Skeleton {
 	std::vector<GameObject*> parts;
 	std::vector<GameObject*> connectors;
 	std::vector<Transform> basePose;
+};
+
+struct Texture {
+	void* data;
+	int width;
+	int height;
 };
 
 class Game {
@@ -64,7 +70,7 @@ class Game {
 		void NewSkeletonPart(Vector3 newPos, Vector3 newRot, Vector3 newScale, std::string name, std::string skeleName, GameObject* parent, bool canTranslate, bool canRotate);
 		void NewObject(GameObject* one, GameObject* two);
 		void NewCamera(Vector3 pos, Vector3 direction);
-		void CreateProgram(std::string name, bool oneDraw = false);	
+		void CreateProgram(std::string name);	
 		void CreateShader(std::string name, const char* filename, GLenum type);
 		void DrawText(Vector3 pos, Vector3 color, std::string text, void* font = GLUT_BITMAP_HELVETICA_18);
 		void AttachShader(std::string programName, std::string vertexName, std::string fragmentName);
@@ -131,7 +137,7 @@ class Game {
 		std::map<std::string, Program> programs;
 		std::map<std::string, GLuint> shaders;
 		std::map<std::string, FBO> fbos;
-		std::map<std::string, GLuint> textures;
+		std::map<std::string, Texture> textures;
 
 		std::string currentProgram;
 
@@ -152,7 +158,4 @@ class Game {
 		time_t newTime;
 		time_t deltaTime;
 		time_t oldTime;
-
-		bool snap;
-		float snapTime;
 };
