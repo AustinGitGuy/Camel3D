@@ -33,9 +33,8 @@ struct Transform {
 struct Skeleton {
 	std::vector<GameObject*> parts;
 	std::vector<GameObject*> connectors;
+	std::vector<Transform> basePose;
 };
-
-enum SkeletonJoint {   };
 
 class Game {
 
@@ -61,8 +60,8 @@ class Game {
 		void NewObject(GameObject::Type newType, char* filename, Vector3 newColor, Vector3 newPos, Vector3 newScale, Vector3 newRot, std::string name, bool isStatic, bool hasCollider = true);
 		void NewObject(GameObject::Type newType, Vector3 newColor, Vector3 newPos, Vector3 newScale, Vector3 newRot, std::string name, GameObject* parent, bool isStatic, bool hasCollider = true);
 		void NewObject(Vector3 newPos, Vector3 newScale, Vector3 newRot, std::string newName);
-		void NewSkeletonPart(Vector3 newPos, Vector3 newRot, std::string name, std::string skeleName, GameObject* parent = nullptr);
-		void NewSkeletonPart(Vector3 newPos, Vector3 newRot, std::string name, std::string skeleName, GameObject* parent, bool canTranslate, bool canRotate);
+		void NewSkeletonPart(Vector3 newPos, Vector3 newRot, Vector3 newScale, std::string name, std::string skeleName, GameObject* parent = nullptr);
+		void NewSkeletonPart(Vector3 newPos, Vector3 newRot, Vector3 newScale, std::string name, std::string skeleName, GameObject* parent, bool canTranslate, bool canRotate);
 		void NewObject(GameObject* one, GameObject* two);
 		void NewCamera(Vector3 pos, Vector3 direction);
 		void CreateProgram(std::string name, bool oneDraw = false);	

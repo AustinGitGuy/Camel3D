@@ -99,42 +99,41 @@ void Game::Init(int width, int height){
 
 	//Create the skeleton
 
-	NewSkeletonPart(Vector3(-1.5f, 3, -6), VECTOR3_ZERO, "SkeleRoot", "BasicSkele", nullptr, true, true);
-	NewSkeletonPart(Vector3(0, -0.4f, 0), VECTOR3_ZERO, "SkeleNeck", "BasicSkele", FindObject("SkeleRoot"), false, true);
-	NewSkeletonPart(Vector3(0, -0.2f, 0), VECTOR3_ZERO, "SkeleClavicle", "BasicSkele", FindObject("SkeleNeck"), false, false);
-	NewSkeletonPart(Vector3(0, -0.8f, 0), VECTOR3_ZERO, "SkeleMidspine", "BasicSkele", FindObject("SkeleClavicle"), false, true);
-	NewSkeletonPart(Vector3(0, -0.8f, 0), VECTOR3_ZERO, "SkeleLowerSpine", "BasicSkele", FindObject("SkeleMidspine"), false, true);
+	NewSkeletonPart(Vector3(-1.5f, 3, -6), VECTOR3_ZERO, VECTOR3_ONE, "SkeleRoot", "BasicSkele", nullptr, true, true);
+	NewSkeletonPart(Vector3(0, -0.4f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleNeck", "BasicSkele", FindObject("SkeleRoot"), false, true);
+	NewSkeletonPart(Vector3(0, -0.2f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleClavicle", "BasicSkele", FindObject("SkeleNeck"), false, false);
+	NewSkeletonPart(Vector3(0, -0.8f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleMidspine", "BasicSkele", FindObject("SkeleClavicle"), false, true);
+	NewSkeletonPart(Vector3(0, -0.8f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleLowerSpine", "BasicSkele", FindObject("SkeleMidspine"), false, true);
 
-	NewSkeletonPart(Vector3(-.2f, -.2f, 0), VECTOR3_ZERO, "SkeleShoulderbladeR", "BasicSkele", FindObject("SkeleClavicle"), true, false);
-	NewSkeletonPart(Vector3(-.2f, .2f, 0), VECTOR3_ZERO, "SkeleShoulderR", "BasicSkele", FindObject("SkeleShoulderbladeR"), false, true);
-	NewSkeletonPart(Vector3(-.65f, -.5f, 0), VECTOR3_ZERO, "SkeleElbowR", "BasicSkele", FindObject("SkeleShoulderR"), false, true);
-	NewSkeletonPart(Vector3(-.4f, -.3f, 0), VECTOR3_ZERO, "SkeleForearmR", "BasicSkele", FindObject("SkeleElbowR"), false, false);
-	NewSkeletonPart(Vector3(-.4f, -.3f, 0), VECTOR3_ZERO, "SkeleWristR", "BasicSkele", FindObject("SkeleForearmR"), false, true);
-	NewSkeletonPart(Vector3(-.1f, -.1f, 0), VECTOR3_ZERO, "SkeleHandR", "BasicSkele", FindObject("SkeleWristR"), false, false);
+	NewSkeletonPart(Vector3(-.2f, -.2f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleShoulderbladeR", "BasicSkele", FindObject("SkeleClavicle"), true, false);
+	NewSkeletonPart(Vector3(-.2f, .2f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleShoulderR", "BasicSkele", FindObject("SkeleShoulderbladeR"), false, true);
+	NewSkeletonPart(Vector3(-.65f, -.5f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleElbowR", "BasicSkele", FindObject("SkeleShoulderR"), false, true);
+	NewSkeletonPart(Vector3(-.4f, -.3f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleForearmR", "BasicSkele", FindObject("SkeleElbowR"), false, false);
+	NewSkeletonPart(Vector3(-.4f, -.3f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleWristR", "BasicSkele", FindObject("SkeleForearmR"), false, true);
+	NewSkeletonPart(Vector3(-.1f, -.1f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleHandR", "BasicSkele", FindObject("SkeleWristR"), false, false);
 
-	NewSkeletonPart(Vector3(.2f, -.2f, 0), VECTOR3_ZERO, "SkeleShoulderbladeL", "BasicSkele", FindObject("SkeleClavicle"), true, false);
-	NewSkeletonPart(Vector3(.2f, .2f, 0), VECTOR3_ZERO, "SkeleShoulderL", "BasicSkele", FindObject("SkeleShoulderbladeL"), false, true);
-	NewSkeletonPart(Vector3(.65f, -.5f, 0), VECTOR3_ZERO, "SkeleElbowL", "BasicSkele", FindObject("SkeleShoulderL"), false, true);
-	NewSkeletonPart(Vector3(.4f, -.3f, 0), VECTOR3_ZERO, "SkeleForearmL", "BasicSkele", FindObject("SkeleElbowL"), false, false);
-	NewSkeletonPart(Vector3(.4f, -.3f, 0), VECTOR3_ZERO, "SkeleWristL", "BasicSkele", FindObject("SkeleForearmL"), false, true);
-	NewSkeletonPart(Vector3(.1f, -.1f, 0), VECTOR3_ZERO, "SkeleHandL", "BasicSkele", FindObject("SkeleWristL"), false, false);
+	NewSkeletonPart(Vector3(.2f, -.2f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleShoulderbladeL", "BasicSkele", FindObject("SkeleClavicle"), true, false);
+	NewSkeletonPart(Vector3(.2f, .2f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleShoulderL", "BasicSkele", FindObject("SkeleShoulderbladeL"), false, true);
+	NewSkeletonPart(Vector3(.65f, -.5f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleElbowL", "BasicSkele", FindObject("SkeleShoulderL"), false, true);
+	NewSkeletonPart(Vector3(.4f, -.3f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleForearmL", "BasicSkele", FindObject("SkeleElbowL"), false, false);
+	NewSkeletonPart(Vector3(.4f, -.3f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleWristL", "BasicSkele", FindObject("SkeleForearmL"), false, true);
+	NewSkeletonPart(Vector3(.1f, -.1f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleHandL", "BasicSkele", FindObject("SkeleWristL"), false, false);
 
-	NewSkeletonPart(Vector3(-.4f, 0.15f, 0), VECTOR3_ZERO, "SkeleHipR", "BasicSkele", FindObject("SkeleLowerSpine"), false, true);
-	NewSkeletonPart(Vector3(0, -.8f, 0), VECTOR3_ZERO, "SkeleKneeR", "BasicSkele", FindObject("SkeleHipR"), false, true);
-	NewSkeletonPart(Vector3(0, -.35f, 0), VECTOR3_ZERO, "SkeleShinR", "BasicSkele", FindObject("SkeleKneeR"), false, false);
-	NewSkeletonPart(Vector3(0, -.35f, 0), VECTOR3_ZERO, "SkeleAnkleR", "BasicSkele", FindObject("SkeleShinR"), false, true);
-	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, "SkeleFootR", "BasicSkele", FindObject("SkeleAnkleR"), false, true);
-	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, "SkeleToesR", "BasicSkele", FindObject("SkeleFootR"), false, false);
+	NewSkeletonPart(Vector3(-.4f, 0.15f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleHipR", "BasicSkele", FindObject("SkeleLowerSpine"), false, true);
+	NewSkeletonPart(Vector3(0, -.8f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleKneeR", "BasicSkele", FindObject("SkeleHipR"), false, true);
+	NewSkeletonPart(Vector3(0, -.35f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleShinR", "BasicSkele", FindObject("SkeleKneeR"), false, false);
+	NewSkeletonPart(Vector3(0, -.35f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleAnkleR", "BasicSkele", FindObject("SkeleShinR"), false, true);
+	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, VECTOR3_ONE, "SkeleFootR", "BasicSkele", FindObject("SkeleAnkleR"), false, true);
+	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, VECTOR3_ONE, "SkeleToesR", "BasicSkele", FindObject("SkeleFootR"), false, false);
 
-	NewSkeletonPart(Vector3(.4f, 0.15f, 0), VECTOR3_ZERO, "SkeleHipL", "BasicSkele", FindObject("SkeleLowerSpine"), false, true);
-	NewSkeletonPart(Vector3(0, -.8f, 0), VECTOR3_ZERO, "SkeleKneeL", "BasicSkele", FindObject("SkeleHipL"), false, true);
-	NewSkeletonPart(Vector3(0, -.35f, 0), VECTOR3_ZERO, "SkeleShinL", "BasicSkele", FindObject("SkeleKneeL"), false, false);
-	NewSkeletonPart(Vector3(0, -.35f, 0), VECTOR3_ZERO, "SkeleAnkleL", "BasicSkele", FindObject("SkeleShinL"), false, true);
-	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, "SkeleFootL", "BasicSkele", FindObject("SkeleAnkleL"), false, true);
-	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, "SkeleToesL", "BasicSkele", FindObject("SkeleFootL"), false, false);
+	NewSkeletonPart(Vector3(.4f, 0.15f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleHipL", "BasicSkele", FindObject("SkeleLowerSpine"), false, true);
+	NewSkeletonPart(Vector3(0, -.8f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleKneeL", "BasicSkele", FindObject("SkeleHipL"), false, true);
+	NewSkeletonPart(Vector3(0, -.35f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleShinL", "BasicSkele", FindObject("SkeleKneeL"), false, false);
+	NewSkeletonPart(Vector3(0, -.35f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleAnkleL", "BasicSkele", FindObject("SkeleShinL"), false, true);
+	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, VECTOR3_ONE, "SkeleFootL", "BasicSkele", FindObject("SkeleAnkleL"), false, true);
+	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, VECTOR3_ONE, "SkeleToesL", "BasicSkele", FindObject("SkeleFootL"), false, false);
 
 	starting = new Clip<Transform>(Keyframe<Transform>(SKELE_PARTS, 5));
-	starting->AddKeyframe(Keyframe<Transform>(SKELE_PARTS, 5));
 
 	auto it = std::next(starting->keys.begin(), 0);
 
@@ -150,20 +149,6 @@ void Game::Init(int width, int height){
 
 	it->data[6].rot = Vector3(0, 0, -69);
 	it->data[7].rot = Vector3(0, 0, -140);
-
-	it = std::next(starting->keys.begin(), 1);
-
-	for (int i = 0; i < SKELE_PARTS; i++) {
-		it->data[i].objName = skeletons["BasicSkele"].parts[FindIndexSkeleton("SkeleRoot", "BasicSkele") + i]->name;
-		it->data[i].pos = VECTOR3_ZERO;
-		it->data[i].rot = VECTOR3_ZERO;
-		it->data[i].scale = VECTOR3_ONE;
-	}
-
-	it->data[0].pos = Vector3(0, 0, -.1f);
-
-	it->data[6].rot = Vector3(-.2f, .2f, 0);
-	it->data[7].rot = Vector3(-.65f, -.5f, 0);
 
 	//Generate FBOS
 	CreateBasicFBO("offscreen");
@@ -312,7 +297,6 @@ void Game::Update(){
 	timeElapsed += deltaTime;
 }
 
-//TODO: FIX ANIMATION
 //Animate a transform clip
 void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 	auto it = std::next(clip->keys.begin(), clip->index);
@@ -322,43 +306,107 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 	case 1:
 		if(clip->elapsedTime <= it->loadupTime){
 			for(int i = 0; i < it->arraySize; i++){
-				MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].pos, starting->elapsedTime / 100, skeleName, clip->posRelative);
-				RotateObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].rot, skeleName, starting->elapsedTime / 100);
-				ScaleObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].scale, skeleName, starting->elapsedTime / 100);
+				MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].pos, clip->elapsedTime / 100, skeleName, clip->posRelative);
+				RotateObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].rot, skeleName, clip->elapsedTime / 100);
+				ScaleObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].scale, skeleName, clip->elapsedTime / 100);
 			}
 		}
-		else if (starting->index + 1 == starting->keys.size()){
-			starting->dir = starting->Reverse;
-			if(starting->keys.size() > 1){
-				starting->index = starting->keys.size() - 2;
+		else if(clip->index + 1 == clip->keys.size()){
+			clip->dir = clip->Reverse;
+			if(clip->keys.size() > 1){
+				clip->index = clip->keys.size() - 1;
 			}
-			it = std::next(starting->keys.begin(), starting->index);
-			starting->elapsedTime = it->loadupTime;
+			it = std::next(clip->keys.begin(), clip->index);
+			clip->elapsedTime = it->loadupTime;
 		}
 		else {
-			starting->index++;
-			starting->elapsedTime = 0;
+			clip->index++;
+			clip->elapsedTime = 0;
 		}
 		break;
 	case -1:
-		if (starting->elapsedTime > 0){
-			for (int i = 0; i < it->arraySize; i++){
-				MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].pos, (it->loadupTime - starting->elapsedTime) / 100, skeleName, clip->posRelative);
-				RotateObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].rot, skeleName, (it->loadupTime - starting->elapsedTime) / 100);
-				ScaleObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].scale, skeleName, (it->loadupTime - starting->elapsedTime) / 100);
+		if(clip->elapsedTime > 0){
+			if(clip->keys.size() == 1){
+				for(int i = 0; i < it->arraySize; i++){
+					if(i == 0){
+						MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].basePose[i].pos, clip->elapsedTime / 100, skeleName, false);
+					}
+					else {
+						MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].basePose[i].pos - skeletons[skeleName].parts[i]->GetPos(true), clip->elapsedTime / 100, skeleName, clip->posRelative);
+					}
+					RotateObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].basePose[i].rot, skeleName, clip->elapsedTime / 100);
+					ScaleObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].basePose[i].scale, skeleName, clip->elapsedTime / 100);
+				}
+			}
+			else {
+				for(int i = 0; i < it->arraySize; i++){
+					MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i - 1].pos, (it->loadupTime - clip->elapsedTime) / 100, skeleName, clip->posRelative);
+					RotateObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i - 1].rot, skeleName, (it->loadupTime - clip->elapsedTime) / 100);
+					ScaleObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i - 1].scale, skeleName, (it->loadupTime - clip->elapsedTime) / 100);
+				}
 			}
 		}
-		else if (it == starting->keys.begin()){
-			starting->dir = starting->Forward;
-			starting->elapsedTime = 0;
-			if(starting->keys.size() != 1){
-				starting->index = 1;
+		else if(it == clip->keys.begin()){
+			clip->dir = clip->Forward;
+			clip->elapsedTime = 0;
+			if(clip->keys.size() != 1){
+				clip->index = 1;
 			}
 		}
 		else {
-			starting->index++;
-			it = std::next(starting->keys.begin(), starting->index);
-			starting->elapsedTime = it->loadupTime;
+			clip->index--;
+			it = std::next(clip->keys.begin(), clip->index);
+			clip->elapsedTime = it->loadupTime;
+		}
+		break;
+	}
+}
+
+void Game::Animate(Clip<Transform>* clip){
+	auto it = std::next(clip->keys.begin(), clip->index);
+	switch (clip->dir) {
+	case 0:
+		break;
+	case 1:
+		if(clip->elapsedTime <= it->loadupTime){
+			for(int i = 0; i < it->arraySize; i++){
+				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, clip->elapsedTime / 100, clip->posRelative);
+				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, clip->elapsedTime / 100);
+				ScaleObjectTime(FindIndex(it->data[i].objName), it->data[i].scale, clip->elapsedTime / 100);
+			}
+		}
+		else if(clip->index + 1 == clip->keys.size()){
+			clip->dir = clip->Reverse;
+			if (clip->keys.size() > 1) {
+				clip->index = clip->keys.size() - 2;
+			}
+			it = std::next(clip->keys.begin(), clip->index);
+			clip->elapsedTime = it->loadupTime;
+		}
+		else {
+			clip->index++;
+			clip->elapsedTime = 0;
+		}
+		break;
+	case -1:
+		if(clip->elapsedTime > 0){
+			for(int i = 0; i < it->arraySize; i++){
+				MoveObjectTime(FindIndex(it->data[i].objName), it->data[i].pos, (it->loadupTime - clip->elapsedTime) / 100, clip->posRelative);
+				RotateObjectTime(FindIndex(it->data[i].objName), it->data[i].rot, (it->loadupTime - clip->elapsedTime) / 100);
+				ScaleObjectTime(FindIndex(it->data[i].objName), it->data[i].scale, (it->loadupTime - clip->elapsedTime) / 100);
+			}
+		}
+		else if(it == clip->keys.begin()){
+			clip->dir = clip->Forward;
+			clip->elapsedTime = 0;
+			if(clip->keys.size() != 1){
+				clip->index = 1;
+			}
+		}
+		else {
+			clip->index--;
+			it = std::next(clip->keys.begin(), clip->index);
+			clip->elapsedTime = it->loadupTime;
 		}
 		break;
 	}
@@ -526,6 +574,15 @@ void Game::Display(){
 					DrawText(Vector3(10.0f, (float)(screenHeight - 260), 0.0f), red, "WASD to control camera movement");
 					DrawText(Vector3(10.0f, (float)(screenHeight - 280), 0.0f), red, "c to draw colliders");
 					DrawText(Vector3(10.0f, (float)(screenHeight - 300), 0.0f), red, "z to start/stop. x to reverse/stop");
+					if(starting->dir == -1){
+						DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Reverse. Time elapsed: " + std::to_string(starting->elapsedTime));
+					}
+					else if(starting->dir == 0){
+						DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Stopped. Time elapsed: " + std::to_string(starting->elapsedTime));
+					}
+					else if (starting->dir == 1){
+						DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Forward. Time elapsed: " + std::to_string(starting->elapsedTime));
+					}
 				}
 			}
 			else {
@@ -886,12 +943,14 @@ void Game::RotateObjectTime(int index, Vector3 newRot, std::string skeleName, fl
 }
 
 void Game::ScaleObjectTime(int index, Vector3 newScale, float time){
-	newScale *= objects[index]->GetScale(true);
+	Vector3 oldScale = objects[index]->GetScale(true);
+	newScale = Vector3(oldScale.x * newScale.x, oldScale.y * newScale.y, oldScale.z * newScale.z);
 	objects[index]->Scale(Lerp(objects[index]->GetScale(true), newScale, time));
 }
 
 void Game::ScaleObjectTime(int index, Vector3 newScale, std::string skeleName, float time){
-	newScale *= skeletons[skeleName].parts[index]->GetScale(true);
+	Vector3 oldScale = skeletons[skeleName].parts[index]->GetScale(true);
+	newScale = Vector3(oldScale.x * newScale.x, oldScale.y * newScale.y, oldScale.z * newScale.z);
 	skeletons[skeleName].parts[index]->Scale(Lerp(skeletons[skeleName].parts[index]->GetScale(true), newScale, time));
 }
 
@@ -1185,7 +1244,7 @@ void Game::NewCamera(Vector3 pos, Vector3 direction){
 	cameras.push_back(new Camera(pos, direction));
 }
 
-void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, std::string name, std::string skeleName, GameObject* parent){
+void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, Vector3 newScale, std::string name, std::string skeleName, GameObject* parent){
 	if(parent != nullptr){
 		objects.push_back(new GameObject(GameObject::SPHERE, Vector3(1.0, 0.0, 1.0), newPos, Vector3(0.05f, 0.05f, 0.05f), newRot, name, parent, false, false));
 		GameObject* child = objects[objects.size() - 1];
@@ -1197,9 +1256,12 @@ void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, std::string name, std
 	}
 }
 
-void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, std::string name, std::string skeleName, GameObject* parent, bool canTranslate, bool canRotate){
+void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, Vector3 newScale, std::string name, std::string skeleName, GameObject* parent, bool canTranslate, bool canRotate){
+
+	Vector3 scaleTmp = Vector3(0.05f * newScale.x, 0.05f * newScale.y, 0.05f * newScale.z);
+
 	if(parent != nullptr){
-		skeletons[skeleName].parts.push_back(new GameObject(GameObject::SPHERE, Vector3(1.0, 0.0, 1.0), newPos, Vector3(0.05f, 0.05f, 0.05f), newRot, name, parent, false, false));
+		skeletons[skeleName].parts.push_back(new GameObject(GameObject::SPHERE, Vector3(1.0, 0.0, 1.0), newPos, scaleTmp, newRot, name, parent, false, false));
 		GameObject* child = skeletons[skeleName].parts[skeletons[skeleName].parts.size() - 1];
 		child->SetCanRotate(canRotate);
 		child->SetCanTranslate(canTranslate);
@@ -1207,9 +1269,19 @@ void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, std::string name, std
 		skeletons[skeleName].connectors.push_back(new GameObject(parent, child));
 	}
 	else {
-		skeletons[skeleName].parts.push_back(new GameObject(GameObject::SPHERE, Vector3(1.0, 0.0, 1.0), newPos, Vector3(0.05f, 0.05f, 0.05f), newRot, name, false, false));
+		skeletons[skeleName].parts.push_back(new GameObject(GameObject::SPHERE, Vector3(1.0, 0.0, 1.0), newPos, Vector3(0.05f * newScale.x, 0.05f * newScale.y, 0.05f * newScale.z), newRot, name, false, false));
 		GameObject* child = skeletons[skeleName].parts[skeletons[skeleName].parts.size() - 1];
 		child->SetCanRotate(canRotate);
 		child->SetCanTranslate(canTranslate);
 	}
+
+	int index = skeletons[skeleName].parts.size() - 1;
+
+	Transform tmpTrans;
+	tmpTrans.pos = newPos;
+	tmpTrans.rot = newRot;
+	tmpTrans.scale = newScale;
+
+	skeletons[skeleName].basePose.push_back(tmpTrans);
+	
 }
