@@ -298,6 +298,8 @@ void Game::Display(){
 	newTime = time(NULL);
 	deltaTime = newTime - oldTime;
 
+	int format = (FI_RGBA_RED == 0) ? GL_RGB : GL_BGR;
+
 	for(int i = 0; i < PASS_NUM; i++){
 		//Pass 1: Draw the objects (except for onedraw and snap)
 		if(i == 0){
@@ -309,7 +311,6 @@ void Game::Display(){
 			glUseProgram(programs[currentProgram].id);
 
 			if(textures["terrain"].data){
-				int format = (FI_RGBA_RED == 0) ? GL_RGB : GL_BGR;
 				glEnable(GL_TEXTURE_2D);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textures["terrain"].width, textures["terrain"].height, 
 							 0, format, GL_UNSIGNED_BYTE, textures["terrain"].data);
@@ -317,6 +318,10 @@ void Game::Display(){
 			else {
 				glDisable(GL_TEXTURE_2D);
 			}
+
+			glFrontFace(GL_CW);
+			glutSolidTeapot(1);
+			glFrontFace(GL_CCW);
 
 			for(unsigned int c = 0; c < objects.size(); c++){
 				ResetPosition();
@@ -702,7 +707,6 @@ void Game::CreateTexture(std::string fileName, std::string texName){
 	else {
 		std::cout << "Failed to get image data: " + fileName << std::endl;
 	}
-
 }
 
 void Game::CreateProgram(std::string name){

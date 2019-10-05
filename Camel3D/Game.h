@@ -40,6 +40,7 @@ struct Texture {
 	void* data;
 	int width;
 	int height;
+	GLuint id;
 };
 
 class Game {

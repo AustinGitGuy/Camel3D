@@ -214,7 +214,9 @@ void GameObject::Draw(){
 	
 	if(type == Type::TEAPOT){
 		glColor3f(color[0].x, color[0].y, color[0].z);
+		glFrontFace(GL_CW);
 		glutSolidTeapot(1);
+		glFrontFace(GL_CCW);
 	}
 	if(type == Type::OBJ){
 		glBegin(GL_TRIANGLES);
@@ -222,7 +224,7 @@ void GameObject::Draw(){
 			for(int f = 0; f < obj->obj[o].TotalFaceCount; f++){
 				for(int i = 0; i < 3; i++){
 					glColor3f(color->x, color->y, color->z);
-					glVertex3f((GLfloat)-obj->vert[obj->obj[o].fmap[f].vI[i]].x, (GLfloat)obj->vert[obj->obj[o].fmap[f].vI[i]].y, (GLfloat)obj->vert[obj->obj[o].fmap[f].vI[i]].z);
+					glVertex3f(-obj->vert[obj->obj[o].fmap[f].vI[i]].x, obj->vert[obj->obj[o].fmap[f].vI[i]].y, obj->vert[obj->obj[o].fmap[f].vI[i]].z);
 				}
 			}
 		}
