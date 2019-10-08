@@ -301,7 +301,7 @@ void Game::Display(){
 	int format = (FI_RGBA_RED == 0) ? GL_RGB : GL_BGR;
 
 	for(int i = 0; i < PASS_NUM; i++){
-		//Pass 1: Draw the objects (except for onedraw and snap)
+		//Pass 1: Draw the objects
 		if(i == 0){
 			glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -409,10 +409,14 @@ void Game::Display(){
 //Animate a transform clip
 void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 	auto it = std::next(clip->keys.begin(), clip->index);
+
+	//Depending on the direction of the clip, move the skeleton
 	switch(clip->dir){
 	case 0:
+		//If we are stopped just break
 		break;
 	case 1:
+		//If we are moving forward and are in the current clip, move/rotate/scale the skeleton over time
 		if(clip->elapsedTime <= it->loadupTime){
 			for(int i = 0; i < it->arraySize; i++){
 				MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].pos, clip->elapsedTime / 100, skeleName, clip->posRelative);
@@ -420,6 +424,7 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 				ScaleObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i].scale, skeleName, clip->elapsedTime / 100);
 			}
 		}
+		//If we are at the end of the clip, move in reverse
 		else if(clip->index + 1 == clip->keys.size()){
 			clip->dir = clip->Reverse;
 			if(clip->keys.size() > 1){
@@ -428,15 +433,19 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 			it = std::next(clip->keys.begin(), clip->index);
 			clip->elapsedTime = it->loadupTime;
 		}
+		//If none of the above are true move to the next keyframe
 		else {
 			clip->index++;
 			clip->elapsedTime = 0;
 		}
 		break;
 	case -1:
+		//If we are moving in reverse and are in the current clip, move/rotate/scale the skeleton over time (time > 0)
 		if(clip->elapsedTime > 0){
+			//If the size is one than animate based on the base pose position
 			if(clip->keys.size() == 1){
 				for(int i = 0; i < it->arraySize; i++){
+					//Move the pose with respect to the root (zero is root) then rotate/scale over time
 					if(i == 0){
 						MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].basePose[i].pos, clip->elapsedTime / 100, skeleName, false);
 					}
@@ -447,6 +456,7 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 					ScaleObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].basePose[i].scale, skeleName, clip->elapsedTime / 100);
 				}
 			}
+			//Otherwise use the last position to animate
 			else {
 				for(int i = 0; i < it->arraySize; i++){
 					MoveObjectTime(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i - 1].pos, (it->loadupTime - clip->elapsedTime) / 100, skeleName, clip->posRelative);
@@ -455,6 +465,7 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 				}
 			}
 		}
+		//If we are at the beginning, move it in forward motion
 		else if(it == clip->keys.begin()){
 			clip->dir = clip->Forward;
 			clip->elapsedTime = 0;
@@ -462,6 +473,7 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 				clip->index = 1;
 			}
 		}
+		//Otherwise just subtract from the index and reset time
 		else {
 			clip->index--;
 			it = std::next(clip->keys.begin(), clip->index);
@@ -471,6 +483,7 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 	}
 }
 
+//This is just the animate function but with object(s) instead
 void Game::Animate(Clip<Transform>* clip){
 	auto it = std::next(clip->keys.begin(), clip->index);
 	switch (clip->dir) {
@@ -521,6 +534,7 @@ void Game::Animate(Clip<Transform>* clip){
 	}
 }
 
+//Helper functions to stop/start/switch animation clips
 template<class T>
 void Game::StopAnimation(Clip<T>* clip){
 	clip->dir = clip->Stop;
@@ -551,6 +565,7 @@ void Game::SwitchReverse(Clip<T>* clip){
 	}
 }
 
+//These are menu options (right click). The examples given are to spawn objects, a camera, or attach a collider to the current object
 void Game::Menu(int id){
 	switch(id){
 	case 1:
@@ -574,6 +589,7 @@ void Game::Menu(int id){
 	}
 }
 
+//This is a menu to set the color of the object
 void Game::ColorMenu(int id){
 	switch(id){
 	case 1:
@@ -588,6 +604,7 @@ void Game::ColorMenu(int id){
 	}
 }
 
+//This will just translate the current object and check collisions. If it collides move it back the same amount (to prevent clipping)
 void Game::MoveCurrentObject(Vector3 pos, bool relative){
 	objects[objectIndex]->Translate(pos, relative);
 	GameObject *collider = CheckAllCollisions();
@@ -601,10 +618,12 @@ void Game::MoveCurrentObject(Vector3 pos, bool relative){
 	}
 }
 
+//This rotates the current object (Todo: Check collisions on children)
 void Game::RotateCurrentObject(Vector3 rot, bool relative){
 	objects[objectIndex]->Rotate(rot, relative);
 }
 
+//This checks all collisions ofr the current object
 GameObject* Game::CheckAllCollisions(){
 	for(unsigned int i = 0; i < objects.size(); i++){
 		if(objects[objectIndex] != objects[i]){
@@ -618,6 +637,7 @@ GameObject* Game::CheckAllCollisions(){
 	return false;
 }
 
+//This checks all collisions for object at index
 GameObject* Game::CheckAllCollisions(int objIndex){
 	for(unsigned int i = 0; i < objects.size(); i++){
 		if(objects[objIndex] != objects[i]){
@@ -631,6 +651,7 @@ GameObject* Game::CheckAllCollisions(int objIndex){
 	return false;
 }
 
+//Draw text helper function
 void Game::DrawText(Vector3 pos, Vector3 color, std::string text, void* font){
 	ResetPosition();
 	glColor3f(color.x, color.y, color.z);
@@ -639,7 +660,7 @@ void Game::DrawText(Vector3 pos, Vector3 color, std::string text, void* font){
 	glutBitmapString(font, newText);
 }
 
-
+//Instance functions (so game can be accessed anywhere)
 Game* Game::GetInstance(){
 	assert(instance != NULL);
 	return instance;
@@ -656,24 +677,31 @@ void Game::CleanupInstance(){
 	instance = NULL;
 }
 
+//Create and FBO
 void Game::CreateBasicFBO(std::string name){
+
+	//Generate the things we need for fbos
 	glGenFramebuffers(1, &fbos[name].fbo);
 	glGenTextures(1, &fbos[name].texture);
 	glGenRenderbuffers(1, &fbos[name].fbo);
 
+	//Bind it so we can use it. Create the whole screen as the texture width/height
 	glBindFramebuffer(GL_FRAMEBUFFER, fbos[name].fbo);
 
 	glBindTexture(GL_TEXTURE_2D, fbos[name].texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
+	//Parameters for texture
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbos[name].texture, 0);
 
+	//Bind the renderbuffer to the FBO
 	glBindRenderbuffer(GL_RENDERBUFFER, fbos[name].fbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, screenWidth, screenHeight);
 	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbos[name].fbo);
 
+	//If its complete state it on the console
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE){
 		std::cout << "Created framebuffer with name: " << name << std::endl;
 	}
@@ -682,25 +710,33 @@ void Game::CreateBasicFBO(std::string name){
 	}
 }
 
+//Create a texture
 void Game::CreateTexture(std::string fileName, std::string texName){
 
 	//Creates bitmap images
 	textures[texName].data = 0;
 
+	//Load it in from freeimage
 	FREE_IMAGE_FORMAT format = FreeImage_GetFIFFromFilename(fileName.c_str());
 
 	FIBITMAP* bitmap = FreeImage_Load(format, fileName.c_str(), 0);
 
+	//Error checking
 	if(!bitmap){
 		std::cout << "Failed to load image: " + fileName << std::endl;
 		return;
 	}
 
+	//Convert it to 24 bits
 	FIBITMAP* bitmap2 = FreeImage_ConvertTo24Bits(bitmap);
 	FreeImage_Unload(bitmap);
+
+	//Set the texture data
 	textures[texName].data = FreeImage_GetBits(bitmap2);
 	textures[texName].width = FreeImage_GetWidth(bitmap2);
 	textures[texName].height = FreeImage_GetHeight(bitmap2);
+
+	//If we loaded it properly output to console
 	if(textures[texName].data){
 		std::cout << "Loaded image: " + fileName << std::endl;
 	}
@@ -709,6 +745,7 @@ void Game::CreateTexture(std::string fileName, std::string texName){
 	}
 }
 
+//Create a program using the given name
 void Game::CreateProgram(std::string name){
 	programs[name].id = glCreateProgram();
 	if(programs[name].id == 0){
@@ -719,6 +756,7 @@ void Game::CreateProgram(std::string name){
 	}
 }
 
+//Create a shader using the current filepath and type
 void Game::CreateShader(std::string name, const char* path, GLenum type){
 	shaders[name] = glCreateShader(type);
 
@@ -730,6 +768,7 @@ void Game::CreateShader(std::string name, const char* path, GLenum type){
 	std::cout << "Created shader: " + name << std::endl;
 }
 
+//Compile an already loaded shader
 void Game::CompileShader(std::string name){
 	glCompileShader(shaders[name]);
 	GLint compiled;
@@ -743,6 +782,7 @@ void Game::CompileShader(std::string name){
 	}
 }
 
+//Attach two shaders (vertex and fragment) to an existing program
 void Game::AttachShader(std::string programName, std::string vertexName, std::string fragmentName){
 	glAttachShader(programs[programName].id, shaders[vertexName]);
 	glAttachShader(programs[programName].id, shaders[fragmentName]);
@@ -751,6 +791,7 @@ void Game::AttachShader(std::string programName, std::string vertexName, std::st
 	programs[programName].vertName = vertexName;
 }
 
+//Link a program all together
 void Game::LinkProgram(std::string programName){
 	int programId = programs[programName].id;
 
@@ -766,6 +807,7 @@ void Game::LinkProgram(std::string programName){
 	}
 }
 
+//Detach the shaders from said program (but keep the name referenced)
 void Game::DetachShaders(std::string programName){
 	int programId = programs[programName].id;
 
@@ -773,6 +815,7 @@ void Game::DetachShaders(std::string programName){
 	glDetachShader(programId, shaders[programs[programName].vertName]);
 }
 
+//Keyboard wrappers
 void Game::KeyboardInputWrapper(unsigned char key, int x, int y){
 	instance->KeyboardInput(key, x, y);
 }
@@ -781,6 +824,7 @@ void Game::SpecialKeyboardWrapper(int key, int x, int y){
 	instance->SpecialKeyboard(key, x, y);
 }
 
+//Read a file using a path name
 std::string Game::ReadFile(const char *path){
 	std::ifstream fs(path, std::ios::in);
 
@@ -799,6 +843,7 @@ std::string Game::ReadFile(const char *path){
 	return buffer.str();
 }
 
+//Special keyboard inputs (ups, downs, left, right)
 void Game::SpecialKeyboard(int key, int x, int y){
 	switch(key){
 		//Up/down to change selected object
@@ -839,6 +884,7 @@ void Game::SpecialKeyboard(int key, int x, int y){
 	}
 }
 
+//Lerp an object over time (either relative or world space)
 void Game::MoveObjectTime(int index, Vector3 newMove, float time, bool relative){
 	if(relative){
 		if(newMove == VECTOR3_ZERO){
@@ -854,6 +900,7 @@ void Game::MoveObjectTime(int index, Vector3 newMove, float time, bool relative)
 	}
 }
 
+//Move a skelepart over time (either relative or world space)
 void Game::MoveObjectTime(int index, Vector3 newMove, float time, std::string skeleName, bool relative){
 	if(relative){
 		if(newMove == VECTOR3_ZERO){
@@ -869,27 +916,33 @@ void Game::MoveObjectTime(int index, Vector3 newMove, float time, std::string sk
 	}
 }
 
+//Rotate an object over time
 void Game::RotateObjectTime(int index, Vector3 newRot, float time){
 	objects[index]->Rotate(Lerp(objects[index]->GetRot(true), newRot, time));
 }
 
+//Rotate a skelepart over time
 void Game::RotateObjectTime(int index, Vector3 newRot, std::string skeleName, float time){
 	skeletons[skeleName].parts[index]->Rotate(Lerp(skeletons[skeleName].parts[index]->GetRot(true), newRot, time));
 }
 
+//Scale an object over time
 void Game::ScaleObjectTime(int index, Vector3 newScale, float time){
 	Vector3 oldScale = objects[index]->GetScale(true);
 	newScale = Vector3(oldScale.x * newScale.x, oldScale.y * newScale.y, oldScale.z * newScale.z);
 	objects[index]->Scale(Lerp(objects[index]->GetScale(true), newScale, time));
 }
 
+//Scale a skeleton over time
 void Game::ScaleObjectTime(int index, Vector3 newScale, std::string skeleName, float time){
 	Vector3 oldScale = skeletons[skeleName].parts[index]->GetScale(true);
 	newScale = Vector3(oldScale.x * newScale.x, oldScale.y * newScale.y, oldScale.z * newScale.z);
 	skeletons[skeleName].parts[index]->Scale(Lerp(skeletons[skeleName].parts[index]->GetScale(true), newScale, time));
 }
 
+//Basic keyboard inputs
 void Game::KeyboardInput(unsigned char key, int x, int y){
+	//Calculate the up, and right vectors for the camera (based on rotation)
 	float fraction = 0.15f;
 	Vector3* right = new Vector3(0, 0, 0);
 	Vector3* up = new Vector3(0, 0, 0);
@@ -907,6 +960,7 @@ void Game::KeyboardInput(unsigned char key, int x, int y){
 		break;
 
 		//Move the camera
+		//Shift key (the captial key names) move it faster (by a factor of two)
 	case 'w':
 		cameras[cameraIndex]->pos->x += cameras[cameraIndex]->rot->x * fraction;
 		cameras[cameraIndex]->pos->y += cameras[cameraIndex]->rot->y * fraction;
@@ -1028,11 +1082,13 @@ void Game::KeyboardInput(unsigned char key, int x, int y){
 	delete up;
 }
 
+//Reset the position of GL and the camera
 void Game::ResetPosition(){
 	glLoadIdentity();
 	cameras[cameraIndex]->ResetCamera();
 }
 
+//Find an object based on name
 GameObject* Game::FindObject(std::string name){
 	for(unsigned int i = 0; i < objects.size(); i++){
 		if(objects[i]->name == name) return objects[i];
@@ -1045,6 +1101,7 @@ GameObject* Game::FindObject(std::string name){
 	return nullptr;
 }
 
+//Find an index based on name
 int Game::FindIndex(std::string name){
 	for(unsigned int i = 0; i < objects.size(); i++){
 		if (objects[i]->name == name) return i;
@@ -1053,6 +1110,7 @@ int Game::FindIndex(std::string name){
 	return -1;
 }
 
+//Find a skelepart based on name and skelename
 int Game::FindIndexSkeleton(std::string partName, std::string skeleName){
 	for(unsigned int i = 0; i < skeletons[skeleName].parts.size(); i++){
 		if (skeletons[skeleName].parts[i]->name == partName) return i;
@@ -1061,6 +1119,7 @@ int Game::FindIndexSkeleton(std::string partName, std::string skeleName){
 	return -1;
 }
 
+//Move the camera
 void Game::MoveCameraWrapper(int x, int y){
 	instance->MoveCamera(x, y);
 }
@@ -1069,6 +1128,7 @@ void Game::MoveCamera(int x, int y){
 	cameras[cameraIndex]->Move(x, y, screenWidth, screenHeight);
 }
 
+//Wrappers (since we need to statically call each part but can't from the main)
 void Game::DisplayWrapper(){
 	instance->Display();
 }
@@ -1090,6 +1150,7 @@ void Game::ColorMenuWrapper(int id){
 	instance->ColorMenu(id);
 }
 
+//Reshape the window
 void Game::Reshape(GLsizei width, GLsizei height){
 
 	if (height == 0) height = 1;
@@ -1103,6 +1164,7 @@ void Game::Reshape(GLsizei width, GLsizei height){
 	gluPerspective(45.0f, aspect, 0.1f, 100.0f);
 }
 
+//Mouse input
 void Game::MouseInputWrapper(int button, int state, int x, int y){
 	instance->MouseInput(button, state, x, y);
 }
@@ -1125,7 +1187,6 @@ void Game::MouseInput(int button, int state, int x, int y){
 		double modelview[16], projection[16];
 		int viewport[4];
 		double objx, objy, objz;
-
 
 		//Credit to https://www.experts-exchange.com/questions/24814973/gluunproject-with-glut-c.html for help with gluUnProject
 
