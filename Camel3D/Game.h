@@ -9,6 +9,7 @@
 struct ObjLoader;
 class Vector3;
 class Camera;
+class Skeleton;
 
 struct Program {
 	GLuint id;
@@ -28,12 +29,6 @@ struct Transform {
 	Vector3 rot;
 	Vector3 scale;
 	std::string objName;
-};
-
-struct Skeleton {
-	std::vector<GameObject*> parts;
-	std::vector<GameObject*> connectors;
-	std::vector<Transform> basePose;
 };
 
 struct Texture {
@@ -75,7 +70,7 @@ class Game {
 		void CreateShader(std::string name, const char* filename, GLenum type);
 		void DrawText(Vector3 pos, Vector3 color, std::string text, void* font = GLUT_BITMAP_HELVETICA_18);
 		void AttachShader(std::string programName, std::string vertexName, std::string fragmentName);
-		std::string ReadFile(const char* filename);
+		std::string ReadFile(std::string path);
 		void MoveCurrentObject(Vector3 pos, bool relative = false);
 		void RotateCurrentObject(Vector3 rot, bool relative = false);
 		void CompileShader(std::string name);

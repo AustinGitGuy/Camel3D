@@ -17,6 +17,7 @@
 #include "BoxCollider.h"
 #include <time.h>
 #include "FreeImage.h"
+#include "Skeleton.h"
 
 Game* Game::instance = NULL;
 int Game::msID = 0;
@@ -127,6 +128,8 @@ void Game::Init(int width, int height){
 	NewSkeletonPart(Vector3(0, -.35f, 0), VECTOR3_ZERO, VECTOR3_ONE, "SkeleAnkleL", "BasicSkele", FindObject("SkeleShinL"), false, true);
 	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, VECTOR3_ONE, "SkeleFootL", "BasicSkele", FindObject("SkeleAnkleL"), false, true);
 	NewSkeletonPart(Vector3(0, -.05f, .15f), VECTOR3_ZERO, VECTOR3_ONE, "SkeleToesL", "BasicSkele", FindObject("SkeleFootL"), false, false);
+
+	skeletons["BasicSkele"].WriteToFile("BasicSkele.txt");
 
 	starting = new Clip<Transform>(Keyframe<Transform>(SKELE_PARTS, 5));
 
@@ -825,21 +828,23 @@ void Game::SpecialKeyboardWrapper(int key, int x, int y){
 }
 
 //Read a file using a path name
-std::string Game::ReadFile(const char *path){
-	std::ifstream fs(path, std::ios::in);
+std::string Game::ReadFile(std::string path){
+	std::ifstream file;
 
-	if(!fs.is_open()){
+	file.open(path);
+
+	if(!file.is_open()){
 		std::cout << "ERROR! COULD NOT READ FILE!" << path << std::endl;
 		return nullptr;
 	}
 
 	std::stringstream buffer;
 	std::string line;
-	while(std::getline(fs, line)){
+	while(std::getline(file, line)){
 		buffer << line << "\n";
 	}
 
-	fs.close();
+	file.close();
 	return buffer.str();
 }
 
@@ -1244,7 +1249,7 @@ void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, Vector3 newScale, std
 	Vector3 scaleTmp = Vector3(0.05f * newScale.x, 0.05f * newScale.y, 0.05f * newScale.z);
 
 	if(parent != nullptr){
-		skeletons[skeleName].parts.push_back(new GameObject(GameObject::SPHERE, Vector3(1.0, 0.0, 1.0), newPos, scaleTmp, newRot, name, parent, false, false));
+		skeletons[skeleName].parts.push_back(new GameObject(GameObject::SPHERE, Vector3(1.0, 0.0, 1.0), newPos, scaleTmp, newRot, name, parent, canTranslate, canRotate));
 		GameObject* child = skeletons[skeleName].parts[skeletons[skeleName].parts.size() - 1];
 		child->SetCanRotate(canRotate);
 		child->SetCanTranslate(canTranslate);
@@ -1252,7 +1257,7 @@ void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, Vector3 newScale, std
 		skeletons[skeleName].connectors.push_back(new GameObject(parent, child));
 	}
 	else {
-		skeletons[skeleName].parts.push_back(new GameObject(GameObject::SPHERE, Vector3(1.0, 0.0, 1.0), newPos, Vector3(0.05f * newScale.x, 0.05f * newScale.y, 0.05f * newScale.z), newRot, name, false, false));
+		skeletons[skeleName].parts.push_back(new GameObject(GameObject::SPHERE, Vector3(1.0, 0.0, 1.0), newPos, Vector3(0.05f * newScale.x, 0.05f * newScale.y, 0.05f * newScale.z), newRot, name, canTranslate, canRotate));
 		GameObject* child = skeletons[skeleName].parts[skeletons[skeleName].parts.size() - 1];
 		child->SetCanRotate(canRotate);
 		child->SetCanTranslate(canTranslate);
