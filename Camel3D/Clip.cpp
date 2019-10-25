@@ -3,19 +3,21 @@
 #include "Keyframe.h"
 
 template<class T>
-Clip<T>::Clip(Keyframe<T> firstFrame){
+Clip<T>::Clip(Keyframe<T> firstFrame, BlendType type){
 	keys.push_back(firstFrame);
-	dir = Clip::Forward;
+	dir = ClipDirection::Forward;
 	elapsedTime = 0;
 	index = 0;
+	blendType = type;
 }
 
 template<class T>
-Clip<T>::Clip(std::list<Keyframe<T>> keyList){
+Clip<T>::Clip(std::list<Keyframe<T>> keyList, BlendType type) {
 	keys = keyList;
-	dir = Clip::Forward;
+	dir = ClipDirection::Forward;
 	elapsedTime = 0;
 	index = 0;
+	blendType = type;
 }
 
 template<class T>

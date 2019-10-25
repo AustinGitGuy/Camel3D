@@ -82,12 +82,21 @@ class Game {
 		GameObject* FindObject(std::string name);
 		int FindIndex(std::string name);
 		int FindIndexSkeleton(std::string partName, std::string skeleName);
-		void MoveObjectTime(int index, Vector3 newMove, float time, bool relative = true);
-		void MoveObjectTime(int index, Vector3 newMove, float time, std::string skeleName, bool relative = true);
-		void RotateObjectTime(int index, Vector3 newRot, float time);
-		void RotateObjectTime(int index, Vector3 newRot, std::string skeleName, float time);
-		void ScaleObjectTime(int index, Vector3 newScale, float time);
-		void ScaleObjectTime(int index, Vector3 newScale, std::string skeleName, float time);
+
+		void MoveObjectLerp(int index, Vector3 newMove, float time, bool relative = true);
+		void MoveObjectLerp(int index, Vector3 newMove, float time, std::string skeleName, bool relative = true);
+		void RotateObjectLerp(int index, Vector3 newRot, float time);
+		void RotateObjectLerp(int index, Vector3 newRot, std::string skeleName, float time);
+		void ScaleObjectLerp(int index, Vector3 newScale, float time);
+		void ScaleObjectLerp(int index, Vector3 newScale, std::string skeleName, float time);
+
+		void MoveObjectAdd(int index, Vector3 pose0, Vector3 pose1);
+		void MoveObjectAdd(int index, Vector3 pose0, Vector3 pose1, std::string skeleName);
+		void RotateObjectAdd(int index, Vector3 pose0, Vector3 pose1);
+		void RotateObjectAdd(int index, Vector3 pose0, Vector3 pose1, std::string skeleName);
+		void ScaleObjectAdd(int index, Vector3 pose0, Vector3 pose1);
+		void ScaleObjectAdd(int index, Vector3 pose0, Vector3 pose1, std::string skeleName);
+
 		void Animate(Clip<Transform>* clip, std::string skeleName);
 		void Animate(Clip<Transform>* clip);
 		template<class T>

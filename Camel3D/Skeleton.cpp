@@ -65,7 +65,7 @@ bool Skeleton::ReadFromFile(std::string fileName){
 					break;
 				}
 				else {
-					partName += letter;
+					parentName += letter;
 				}
 			}
 

@@ -291,8 +291,9 @@ void GameObject::Translate(Vector3 newPos, bool relative, bool tOverride){
 	if(col) col->RegenerateCollider(pos, size);
 }
 
+//TOverride makes the object move even if it is locked
 void GameObject::Translate(float x, float y, float z, bool relative, bool tOverride){
-	if(!canTranslate && !tOverride) return;
+	if(!canTranslate || !tOverride) return;
 	if(relative){
 		Vector3* posTwo = new Vector3(x + pos->x, y + pos->y, z + pos->z);
 		delete pos;
