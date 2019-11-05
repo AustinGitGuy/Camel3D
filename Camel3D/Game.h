@@ -134,6 +134,8 @@ class Game {
 
 		int cameraIndex = 0;
 		int objectIndex = 0;
+		int skeleIndex = 0;
+		int partIndex = 0;
 
 		Vector3 bgColor;
 
@@ -157,6 +159,7 @@ class Game {
 		bool stopped;
 		bool drawColliders;
 		bool showInfo;
+		bool skeleChoose;
 
 		float timeElapsed = 0;
 

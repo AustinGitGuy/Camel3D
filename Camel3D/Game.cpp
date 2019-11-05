@@ -148,10 +148,10 @@ void Game::Init(int width, int height){
 		it->data[i].scale = VECTOR3_ONE;
 	}
 
-	it->data[0].pos = Vector3(0, 0, .1f);
-
 	it->data[6].rot = Vector3(0, 0, -69);
 	it->data[7].rot = Vector3(0, 0, -140);
+
+	//Blend between multiple keyframe poses
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
@@ -220,13 +220,6 @@ void Game::Init(int width, int height){
 	LinkProgram("CoolTeapotProgram");
 	CompileShader("CoolTeapotProgram");
 
-	CreateProgram("SnapProgram");
-	CreateShader("Snap-vert", "SnapVertex.glsl", GL_VERTEX_SHADER);
-	CreateShader("Snap-frag", "SnapFragment.glsl", GL_FRAGMENT_SHADER);
-	AttachShader("SnapProgram", "Snap-vert", "Snap-frag");
-	LinkProgram("SnapProgram");
-	CompileShader("SnapProgram");
-
 	currentProgram = "defaultProgram";
 	inited = true;
 }
@@ -236,17 +229,17 @@ void Game::Cleanup(){
 		return;
 	}
 
-	for(std::vector<GameObject*>::iterator it = objects.begin() ; it != objects.end(); ++it){
+	for(auto it = objects.begin() ; it != objects.end(); ++it){
 		delete (*it);
 	} 
 	objects.clear();
 
-	for(std::vector<Camera*>::iterator it = cameras.begin() ; it != cameras.end(); ++it){
+	for(auto it = cameras.begin() ; it != cameras.end(); ++it){
 		delete (*it);
 	} 
 	cameras.clear();
 
-	for(std::vector<GameObject*>::iterator it = connectors.begin(); it != connectors.end(); ++it) {
+	for(auto it = connectors.begin(); it != connectors.end(); ++it) {
 		delete (*it);
 	}
 	connectors.clear();
@@ -370,7 +363,12 @@ void Game::Display(){
 			glBindFramebuffer(GL_FRAMEBUFFER, fbos["offscreen"].fbo);
 			glUseProgram(programs["defaultProgram"].id);
 
-			DrawText(Vector3(10.0f, (float)(screenHeight - 20), 0.0f), red, "Current selected object: " + objects[objectIndex]->name);
+			if(skeleChoose){
+				DrawText(Vector3(10.0f, (float)(screenHeight - 20), 0.0f), red, "Current selected skelepart: " + skeletons["BasicSkele"].parts[partIndex]->name);
+			}
+			else {
+				DrawText(Vector3(10.0f, (float)(screenHeight - 20), 0.0f), red, "Current selected object: " + objects[objectIndex]->name);
+			}
 			DrawText(Vector3(10.0f, (float)(screenHeight - 40), 0.0f), red, "Current Shader: " + currentProgram);
 
 			if(!showInfo){
@@ -379,27 +377,38 @@ void Game::Display(){
 			else {
 				DrawText(Vector3(10.0f, (float)(screenHeight - 60), 0.0f), red, "Press i to hide controls");
 				DrawText(Vector3(10.0f, (float)(screenHeight - 80), 0.0f), red, "1, 2, 3 to control X, Y, Z.");
-				DrawText(Vector3(10.0f, (float)(screenHeight - 100), 0.0f), red, "Current X, Y, Z Position: " + std::to_string(objects[objectIndex]->GetPos().x) + ", " +
-						 std::to_string(objects[objectIndex]->GetPos().y) + ", " + std::to_string(objects[objectIndex]->GetPos().z));
+				if(skeleChoose){
+					DrawText(Vector3(10.0f, (float)(screenHeight - 100), 0.0f), red, "Current X, Y, Z Position: " + std::to_string(skeletons["BasicSkele"].parts[partIndex]->GetPos().x) + ", " +
+						std::to_string(skeletons["BasicSkele"].parts[partIndex]->GetPos().y) + ", " + std::to_string(skeletons["BasicSkele"].parts[partIndex]->GetPos().z));
+					DrawText(Vector3(10.0f, (float)(screenHeight - 160), 0.0f), red, "Current X, Y, Z Rotation: " + std::to_string(skeletons["BasicSkele"].parts[partIndex]->GetRot().x) + ", " +
+						std::to_string(skeletons["BasicSkele"].parts[partIndex]->GetRot().y) + ", " + std::to_string(skeletons["BasicSkele"].parts[partIndex]->GetRot().z));
+				}
+				else {
+					DrawText(Vector3(10.0f, (float)(screenHeight - 100), 0.0f), red, "Current X, Y, Z Position: " + std::to_string(objects[objectIndex]->GetPos().x) + ", " +
+						std::to_string(objects[objectIndex]->GetPos().y) + ", " + std::to_string(objects[objectIndex]->GetPos().z));
+					DrawText(Vector3(10.0f, (float)(screenHeight - 160), 0.0f), red, "Current X, Y, Z Rotation: " + std::to_string(objects[objectIndex]->GetRot().x) + ", " +
+						std::to_string(objects[objectIndex]->GetRot().y) + ", " + std::to_string(objects[objectIndex]->GetRot().z));
+				}
+				
 				DrawText(Vector3(10.0f, (float)(screenHeight - 120), 0.0f), red, "!, @, # to control -X, -Y, -Z");
 				DrawText(Vector3(10.0f, (float)(screenHeight - 140), 0.0f), red, "4, 5, 6 to control rotational X, Y, Z");
-				DrawText(Vector3(10.0f, (float)(screenHeight - 160), 0.0f), red, "Current X, Y, Z Rotation: " + std::to_string(objects[objectIndex]->GetRot().x) + ", " +
-						 std::to_string(objects[objectIndex]->GetRot().y) + ", " + std::to_string(objects[objectIndex]->GetRot().z));
+
 				DrawText(Vector3(10.0f, (float)(screenHeight - 180), 0.0f), red, "$, %, ^ to control rotational -X, -Y, -Z");
 				DrawText(Vector3(10.0f, (float)(screenHeight - 200), 0.0f), red, "Up/Down to select objects");
 				DrawText(Vector3(10.0f, (float)(screenHeight - 220), 0.0f), red, "Right/Left to select cameras");
-				DrawText(Vector3(10.0f, (float)(screenHeight - 240), 0.0f), red, "Enter to change shader");
-				DrawText(Vector3(10.0f, (float)(screenHeight - 260), 0.0f), red, "WASD to control camera movement");
-				DrawText(Vector3(10.0f, (float)(screenHeight - 280), 0.0f), red, "c to draw colliders");
-				DrawText(Vector3(10.0f, (float)(screenHeight - 300), 0.0f), red, "z to start/stop. x to reverse/stop");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 240), 0.0f), red, "Shift to change control of skeletons/objects");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 260), 0.0f), red, "Enter to change shader");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 280), 0.0f), red, "WASD to control camera movement");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 300), 0.0f), red, "c to draw colliders");
+				DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "z to start/stop. x to reverse/stop");
 				if(starting->dir == -1){
-					DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Reverse. Time elapsed: " + std::to_string(starting->elapsedTime));
+					DrawText(Vector3(10.0f, (float)(screenHeight - 340), 0.0f), red, "Reverse. Time elapsed: " + std::to_string(starting->elapsedTime));
 				}
 				else if(starting->dir == 0){
-					DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Stopped. Time elapsed: " + std::to_string(starting->elapsedTime));
+					DrawText(Vector3(10.0f, (float)(screenHeight - 340), 0.0f), red, "Stopped. Time elapsed: " + std::to_string(starting->elapsedTime));
 				}
 				else if (starting->dir == 1){
-					DrawText(Vector3(10.0f, (float)(screenHeight - 320), 0.0f), red, "Forward. Time elapsed: " + std::to_string(starting->elapsedTime));
+					DrawText(Vector3(10.0f, (float)(screenHeight - 340), 0.0f), red, "Forward. Time elapsed: " + std::to_string(starting->elapsedTime));
 				}
 			}
 		}
@@ -483,7 +492,7 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 					switch (clip->blendType){
 					case BlendType::BlendLerp:
 						//Move the pose with respect to the root (zero is root) then rotate/scale over time
-						if (i == 0) {
+						if(i == 0){
 							MoveObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].basePose[i].pos, clip->elapsedTime / 100, skeleName, false);
 						}
 						else {
@@ -735,21 +744,32 @@ void Game::ColorMenu(int id){
 
 //This will just translate the current object and check collisions. If it collides move it back the same amount (to prevent clipping)
 void Game::MoveCurrentObject(Vector3 pos, bool relative){
-	objects[objectIndex]->Translate(pos, relative);
-	GameObject *collider = CheckAllCollisions();
-	if(collider){
-		if(!collider->isStatic){
-			collider->Translate(Vector3(pos), relative);
-		}
-		else {
-			objects[objectIndex]->Translate(Vector3(pos * -1.0f), relative);
+	if(skeleChoose){
+		skeletons["BasicSkele"].parts[partIndex]->Translate(pos, relative);
+	}
+	else {
+		objects[objectIndex]->Translate(pos, relative);
+		GameObject* collider = CheckAllCollisions();
+		if(collider){
+			if(!collider->isStatic){
+				collider->Translate(Vector3(pos), relative);
+			}
+			else {
+				objects[objectIndex]->Translate(Vector3(pos * -1.0f), relative);
+			}
 		}
 	}
+	
 }
 
 //This rotates the current object (Todo: Check collisions on children)
 void Game::RotateCurrentObject(Vector3 rot, bool relative){
-	objects[objectIndex]->Rotate(rot, relative);
+	if(skeleChoose){
+		skeletons["BasicSkele"].parts[partIndex]->Rotate(rot, relative);
+	}
+	else {
+		objects[objectIndex]->Rotate(rot, relative);
+	}
 }
 
 //This checks all collisions ofr the current object
@@ -972,47 +992,6 @@ std::string Game::ReadFile(std::string path){
 
 	file.close();
 	return buffer.str();
-}
-
-//Special keyboard inputs (ups, downs, left, right)
-void Game::SpecialKeyboard(int key, int x, int y){
-	switch(key){
-		//Up/down to change selected object
-	case GLUT_KEY_UP:
-		objectIndex++;
-		if((unsigned int)objectIndex >= objects.size()){
-			objectIndex = 0;
-		}
-		if(objects[objectIndex]->GetType() == GameObject::Type::CONNECTOR) objectIndex++;
-		if((unsigned int)objectIndex >= objects.size()){
-			objectIndex = 0;
-		}
-		break;
-	case GLUT_KEY_DOWN:
-		objectIndex--;
-		if(objectIndex < 0){
-			objectIndex = (int)objects.size() - 1;
-		}
-		if(objects[objectIndex]->GetType() == GameObject::Type::CONNECTOR) objectIndex--;
-		if(objectIndex < 0){
-			objectIndex = (int)objects.size() - 1;
-		}
-		break;
-	case GLUT_KEY_LEFT:
-		cameraIndex++;
-		if((unsigned int)cameraIndex >= cameras.size()){
-			cameraIndex = 0;
-		}
-		break;
-	case GLUT_KEY_RIGHT:
-		cameraIndex--;
-		if(cameraIndex < 0){
-			cameraIndex = (int)cameras.size() - 1;
-		}
-		break;
-	default:
-		break;
-	}
 }
 
 //Lerp an object over time (either relative or world space)
@@ -1241,6 +1220,67 @@ void Game::KeyboardInput(unsigned char key, int x, int y){
 	delete up;
 }
 
+//Special keyboard inputs (ups, downs, left, right)
+void Game::SpecialKeyboard(int key, int x, int y) {
+	switch (key) {
+		//Up/down to change selected object
+	case GLUT_KEY_UP:
+		if(skeleChoose){
+			partIndex++;
+			if((unsigned int)partIndex >= skeletons["BasicSkele"].parts.size()){
+				partIndex = 0;
+			}
+		}
+		else {
+			objectIndex++;
+			if((unsigned int)objectIndex >= objects.size()){
+				objectIndex = 0;
+			}
+			if(objects[objectIndex]->GetType() == GameObject::Type::CONNECTOR) objectIndex++;
+			if((unsigned int)objectIndex >= objects.size()){
+				objectIndex = 0;
+			}
+		}
+		break;
+	case GLUT_KEY_DOWN:
+		if(skeleChoose){
+			partIndex--;
+			if(partIndex < 0){
+				partIndex = (int)skeletons["BasicSkele"].parts.size() - 1;
+			}
+		}
+		else {
+			objectIndex--;
+			if(objectIndex < 0){
+				objectIndex = (int)objects.size() - 1;
+			}
+			if(objects[objectIndex]->GetType() == GameObject::Type::CONNECTOR) objectIndex--;
+			if(objectIndex < 0){
+				objectIndex = (int)objects.size() - 1;
+			}
+		}
+		break;
+	case GLUT_KEY_LEFT:
+		cameraIndex++;
+		if ((unsigned int)cameraIndex >= cameras.size()) {
+			cameraIndex = 0;
+		}
+		break;
+	case GLUT_KEY_RIGHT:
+		cameraIndex--;
+		if (cameraIndex < 0) {
+			cameraIndex = (int)cameras.size() - 1;
+		}
+		break;
+
+	case GLUT_KEY_SHIFT_L:
+		skeleChoose = !skeleChoose;
+		break;
+	default:
+		break;
+	}
+}
+
 //Reset the position of GL and the camera
 void Game::ResetPosition(){
 	glLoadIdentity();
@@ -1418,6 +1458,8 @@ void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, Vector3 newScale, std
 	}
 
 	int index = skeletons[skeleName].parts.size() - 1;
+
+	//TODO: MAKE THIS RELATIVE SPACE
 
 	Transform tmpTrans;
 	tmpTrans.pos = newPos;
