@@ -151,6 +151,19 @@ void Game::Init(int width, int height){
 	it->data[6].rot = Vector3(0, 0, -69);
 	it->data[7].rot = Vector3(0, 0, -140);
 
+	starting->AddKeyframe(Keyframe<Transform>(SKELE_PARTS, 5));
+
+	it = std::next(starting->keys.begin(), 1);
+
+	for(int i = 0; i < SKELE_PARTS; i++){
+		it->data[i].objName = skeletons["BasicSkele"].parts[FindIndexSkeleton("SkeleRoot", "BasicSkele") + i]->name;
+		it->data[i].pos = VECTOR3_ZERO;
+		it->data[i].rot = VECTOR3_ZERO;
+		it->data[i].scale = VECTOR3_ONE;
+	}
+
+	it->data[0].pos = Vector3(1, 0, 0);
+
 	//Blend between multiple keyframe poses
 
 	glEnable(GL_DEPTH_TEST);
@@ -493,7 +506,7 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 					case BlendType::BlendLerp:
 						//Move the pose with respect to the root (zero is root) then rotate/scale over time
 						if(i == 0){
-							MoveObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].basePose[i].pos, clip->elapsedTime / 100, skeleName, false);
+							//MoveObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].parts[i]->GetPos(false), clip->elapsedTime / 100, skeleName, clip->posRelative);
 						}
 						else {
 							MoveObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), skeletons[skeleName].basePose[i].pos - skeletons[skeleName].parts[i]->GetPos(true), clip->elapsedTime / 100, skeleName, clip->posRelative);
@@ -524,15 +537,25 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 			//Otherwise use the last position to animate
 			else {
 				auto it2 = std::next(clip->keys.begin(), 0);
-				if(clip->index + 1 < clip->keys.size()){
-					it2 = std::next(clip->keys.begin(), clip->index + 1);
+				switch (clip->blendType){
+				case BlendType::BlendLerp:
+					if(clip->index != 0){
+						it2 = std::next(clip->keys.begin(), clip->index - 1);
+					}
+					break;
+				case BlendType::Add:
+					if(clip->index + 1 < clip->keys.size()){
+						it2 = std::next(clip->keys.begin(), clip->index + 1);
+					}
+					break;
+
 				}
 				for(int i = 0; i < it->arraySize; i++){
 					switch(clip->blendType){
 					case BlendType::BlendLerp:
-						MoveObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i - 1].pos, (it->loadupTime - clip->elapsedTime) / 100, skeleName, clip->posRelative);
-						RotateObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i - 1].rot, skeleName, (it->loadupTime - clip->elapsedTime) / 100);
-						ScaleObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), it->data[i - 1].scale, skeleName, (it->loadupTime - clip->elapsedTime) / 100);
+						MoveObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), it2->data[i].pos, (it->loadupTime - clip->elapsedTime) / 100, skeleName, clip->posRelative);
+						RotateObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), it2->data[i].rot, skeleName, (it->loadupTime - clip->elapsedTime) / 100);
+						ScaleObjectLerp(FindIndexSkeleton(it->data[i].objName, skeleName), it2->data[i].scale, skeleName, (it->loadupTime - clip->elapsedTime) / 100);
 						break;
 					case BlendType::Add:
 						if(clip->index == clip->keys.size() - 1){
@@ -563,106 +586,6 @@ void Game::Animate(Clip<Transform>* clip, std::string skeleName){
 			}
 		}
 		//Otherwise just subtract from the index and reset time
-		else {
-			clip->index--;
-			it = std::next(clip->keys.begin(), clip->index);
-			clip->elapsedTime = it->loadupTime;
-		}
-		break;
-	}
-}
-
-//This is just the animate function but with object(s) instead
-void Game::Animate(Clip<Transform>* clip){
-	auto it = std::next(clip->keys.begin(), clip->index);
-	switch(clip->dir){
-	case 0:
-		break;
-	case 1:
-		if(clip->elapsedTime <= it->loadupTime){
-			auto it2 = std::next(clip->keys.begin(), 0);
-			if (clip->index > 0) {
-				it2 = std::next(clip->keys.begin(), clip->index);
-			}
-			for(int i = 0; i < it->arraySize; i++){
-				switch(clip->blendType){
-				case BlendType::BlendLerp:
-					MoveObjectLerp(FindIndex(it->data[i].objName), it->data[i].pos, clip->elapsedTime / 100, clip->posRelative);
-					RotateObjectLerp(FindIndex(it->data[i].objName), it->data[i].rot, clip->elapsedTime / 100);
-					ScaleObjectLerp(FindIndex(it->data[i].objName), it->data[i].scale, clip->elapsedTime / 100);
-					break;
-				case BlendType::Add:
-					if(clip->index == 0){
-						MoveObjectAdd(FindIndex(it->data[i].objName), VECTOR3_ZERO, it->data[i].pos);
-						RotateObjectAdd(FindIndex(it->data[i].objName), VECTOR3_ZERO, it->data[i].rot);
-						ScaleObjectAdd(FindIndex(it->data[i].objName), VECTOR3_ONE, it->data[i].scale);
-					}
-					else {
-						MoveObjectAdd(FindIndex(it->data[i].objName), it2->data[i].pos, it->data[i].pos);
-						RotateObjectAdd(FindIndex(it->data[i].objName), it2->data[i].rot, it->data[i].rot);
-						ScaleObjectAdd(FindIndex(it->data[i].objName), it2->data[i].scale, it->data[i].scale);
-					}
-					break;
-				case BlendType::Average:
-					break;
-				case BlendType::Scale:
-					break;
-				}
-				
-			}
-		}
-		else if(clip->index + 1 == clip->keys.size()){
-			clip->dir = ClipDirection::Reverse;
-			if (clip->keys.size() > 1) {
-				clip->index = clip->keys.size() - 2;
-			}
-			it = std::next(clip->keys.begin(), clip->index);
-			clip->elapsedTime = it->loadupTime;
-		}
-		else {
-			clip->index++;
-			clip->elapsedTime = 0;
-		}
-		break;
-	case -1:
-		if(clip->elapsedTime > 0){
-			auto it2 = std::next(clip->keys.begin(), 0);
-			if (clip->index + 1 < clip->keys.size()) {
-				it2 = std::next(clip->keys.begin(), clip->index + 1);
-			}
-			for(int i = 0; i < it->arraySize; i++){
-				switch (clip->blendType){
-				case BlendType::BlendLerp:
-					MoveObjectLerp(FindIndex(it->data[i].objName), it->data[i].pos, (it->loadupTime - clip->elapsedTime) / 100, clip->posRelative);
-					RotateObjectLerp(FindIndex(it->data[i].objName), it->data[i].rot, (it->loadupTime - clip->elapsedTime) / 100);
-					ScaleObjectLerp(FindIndex(it->data[i].objName), it->data[i].scale, (it->loadupTime - clip->elapsedTime) / 100);
-					break;
-				case BlendType::Add:
-					if(clip->index == clip->keys.size() - 1){
-						MoveObjectAdd(FindIndex(it->data[i].objName), VECTOR3_ZERO, it->data[i].pos);
-						RotateObjectAdd(FindIndex(it->data[i].objName), VECTOR3_ZERO, it->data[i].rot);
-						ScaleObjectAdd(FindIndex(it->data[i].objName), VECTOR3_ONE, it->data[i].scale);
-					}
-					else {
-						MoveObjectAdd(FindIndex(it->data[i].objName), it2->data[i].pos, it->data[i].pos);
-						RotateObjectAdd(FindIndex(it->data[i].objName), it2->data[i].rot, it->data[i].rot);
-						ScaleObjectAdd(FindIndex(it->data[i].objName), it2->data[i].scale, it->data[i].scale);
-					}
-					break;
-				case BlendType::Average:
-					break;
-				case BlendType::Scale:
-					break;
-				}
-			}
-		}
-		else if(it == clip->keys.begin()){
-			clip->dir = ClipDirection::Forward;
-			clip->elapsedTime = 0;
-			if(clip->keys.size() != 1){
-				clip->index = 1;
-			}
-		}
 		else {
 			clip->index--;
 			it = std::next(clip->keys.begin(), clip->index);
@@ -1459,8 +1382,7 @@ void Game::NewSkeletonPart(Vector3 newPos, Vector3 newRot, Vector3 newScale, std
 
 	int index = skeletons[skeleName].parts.size() - 1;
 
-	//TODO: MAKE THIS RELATIVE SPACE
-
+	//TODO: MAKE ROOT RELATIVE
 	Transform tmpTrans;
 	tmpTrans.pos = newPos;
 	tmpTrans.rot = newRot;
