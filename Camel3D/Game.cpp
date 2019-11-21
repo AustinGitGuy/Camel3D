@@ -258,10 +258,24 @@ void Game::Cleanup(){
 	} 
 	cameras.clear();
 
-	for(auto it = connectors.begin(); it != connectors.end(); ++it) {
+	for(auto it = connectors.begin(); it != connectors.end(); ++it){
 		delete (*it);
 	}
 	connectors.clear();
+
+	for(auto it = skeletons.begin(); it != skeletons.end(); ++it){
+		for(auto it2 = it->second.parts.begin(); it2 != it->second.parts.end(); ++it2){
+			delete *it2;
+		}
+		it->second.parts.clear();
+
+		for (auto it2 = it->second.connectors.begin(); it2 != it->second.connectors.end(); ++it2){
+			delete* it2;
+		}
+		it->second.connectors.clear();
+	}
+	skeletons.clear();
+
 
 	DetachShaders("DiffuseProgram");
 	DetachShaders("blueProgram");
