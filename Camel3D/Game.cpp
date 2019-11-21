@@ -325,8 +325,9 @@ void Game::Update(){
 	starting->elapsedTime += (deltaTime.count() / 1000) * starting->dir;
 	timeElapsed += deltaTime.count();
 
-	//TODO: Update each object
-	FindObject("Teapot")->Update(deltaTime.count() / 1000);
+	for(int i = 0; i < objects.size(); i++){
+		objects[i]->Update(deltaTime.count() / 1000);
+	}
 }
 
 void Game::Display(){
