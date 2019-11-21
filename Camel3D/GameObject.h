@@ -5,6 +5,7 @@
 struct ObjLoader;
 class Vector3;
 class Collider;
+class Rigidbody;
 
 //CREDIT TO https://www.dreamincode.net/forums/topic/342023-loading-obj-in-opengl-texture-issue/ for the obj loader
 
@@ -30,6 +31,7 @@ class GameObject {
 		void TranslateFromParent();
 		void SetCanRotate(bool newRotate);
 		void SetCanTranslate(bool newTranslate);
+		void Update(float time);
 		bool GetCanRotate();
 		bool GetCanTranslate();
 		std::vector<GameObject*> GetChildren(){return children;}
@@ -40,8 +42,10 @@ class GameObject {
 		GameObject* GetParent(){return parent;};
 		ObjLoader* OBJLoad(char* filename, ObjLoader* obj);
 		Collider* GetCollider(){return col;};
+		Rigidbody* GetRigidbody(){return rb;};
 		Type GetType(){return type;};
 		bool AttachBoxCollider();
+		bool AttachRigidbody(float mass);
 
 		std::string name;
 		bool isStatic;
@@ -58,6 +62,8 @@ class GameObject {
 		Type type;
 
 		Collider* col;
+
+		Rigidbody* rb;
 
 		std::vector<GameObject*> children;
 

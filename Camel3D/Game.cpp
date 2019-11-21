@@ -19,6 +19,7 @@
 #include "FreeImage.h"
 #include "Skeleton.h"
 #include "Clip.h"
+#include "Rigidbody.h"
 
 Game* Game::instance = NULL;
 int Game::msID = 0;
@@ -50,7 +51,7 @@ void Game::Init(int width, int height){
 		return;
 	}
 
-	newTime = oldTime = time(NULL);
+	newTime = oldTime = std::chrono::high_resolution_clock::now();
 
 	bgColor = gray;
 
@@ -93,6 +94,11 @@ void Game::Init(int width, int height){
 	NewObject(GameObject::Type::TEAPOT, Vector3(0.0, 1.0f, 1.0f), Vector3(5.0f, 0.0f, -10.0f), VECTOR3_ONE, VECTOR3_ZERO, "Teapot", false);
 	NewObject(GameObject::Type::OBJ, (char*)filename.c_str(), green, Vector3(-10.0f, -1.0f, -10.0f), Vector3(0.03f, 0.03f, 0.03f), VECTOR3_ZERO, "Diver", true);
 	NewCamera(Vector3(0, 2, 1), Vector3(0, 0, -1));
+
+	GameObject *teapot = FindObject("Teapot");
+	teapot->AttachRigidbody(1);
+
+	teapot->GetRigidbody()->AddForce(Vector3(1, 0, 1));
 
 	//Create the skeleton
 
@@ -302,14 +308,17 @@ void Game::DrawFBO(std::string name){
 void Game::Update(){
 	Animate(starting, "BasicSkele");
 
-	starting->elapsedTime += deltaTime * starting->dir;
-	timeElapsed += deltaTime;
+	starting->elapsedTime += (deltaTime.count() / 1000) * starting->dir;
+	timeElapsed += deltaTime.count();
+
+	//TODO: Update each object
+	FindObject("Teapot")->Update(deltaTime.count() / 1000);
 }
 
 void Game::Display(){
 
 	oldTime = newTime;
-	newTime = time(NULL);
+	newTime = std::chrono::high_resolution_clock::now();
 	deltaTime = newTime - oldTime;
 
 	int format = (FI_RGBA_RED == 0) ? GL_RGB : GL_BGR;

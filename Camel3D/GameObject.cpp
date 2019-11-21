@@ -13,6 +13,7 @@
 #include "OBJStructs.h"
 #include "BoxCollider.h"
 #include "DrawShapes.h"
+#include "Rigidbody.h"
 
 float pyramidData[]{
 	0.0f, 1.0f, 0.0f,
@@ -142,6 +143,14 @@ bool GameObject::AttachBoxCollider(){
 	else return false;
 }
 
+bool GameObject::AttachRigidbody(float mass){
+	if(rb == nullptr){
+		rb = new Rigidbody(mass, *pos, IntegrationType::EulerExplicit);
+		return true;
+	}
+	else return false;
+}
+
 GameObject::GameObject(Type newType, char* filename, Vector3 newColor, Vector3 newPos, Vector3 newScale, Vector3 newRot, std::string newName, bool newStatic, bool hasCollider){
 	pos = new Vector3(newPos.x, newPos.y, newPos.z);
 	obj = new ObjLoader();
@@ -159,7 +168,7 @@ GameObject::GameObject(GameObject* one, GameObject* two){
 	type = Type::CONNECTOR;
 	isStatic = true;
 	name = "Connector";
-
+	 
 	connectionOne = one;
 	connectionTwo = two;
 }
@@ -173,6 +182,9 @@ GameObject::~GameObject(){
 	delete[] color;
 	if(type == Type::PYRAMID){
 		delete vertexData;
+	}
+	if(rb != nullptr){
+		delete rb;
 	}
 }
 
@@ -276,6 +288,15 @@ Vector3 GameObject::GetScale(bool relative){
 	else return *scale;
 }
 
+void GameObject::Update(float time){
+	if(rb){
+		rb->UpdatePosAndRot(time);
+		rb->UpdateAccel();
+		delete pos;
+		pos = new Vector3(rb->pos);
+	}
+}
+
 void GameObject::Translate(Vector3 newPos, bool relative, bool tOverride){
 	if(!canTranslate && !tOverride) return;
 	if(relative){
@@ -289,6 +310,7 @@ void GameObject::Translate(Vector3 newPos, bool relative, bool tOverride){
 	}
 
 	if(col) col->RegenerateCollider(pos, size);
+	if(rb) rb->pos = *pos;
 }
 
 //TOverride makes the object move even if it is locked
@@ -305,6 +327,7 @@ void GameObject::Translate(float x, float y, float z, bool relative, bool tOverr
 	}
 
 	if(col) col->RegenerateCollider(pos, size);
+	if(rb) rb->pos = *pos;
 }
 
 void GameObject::TranslateChildren(float x, float y, float z, bool relative){

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <chrono>
 #include "GameObject.h"
 #include "Vector3.h"
 #include "GL/glut.h"
@@ -163,7 +164,7 @@ class Game {
 
 		float timeElapsed = 0;
 
-		time_t newTime;
-		time_t deltaTime;
-		time_t oldTime;
+		std::chrono::high_resolution_clock::time_point newTime;
+		std::chrono::duration<double, std::milli> deltaTime;
+		std::chrono::high_resolution_clock::time_point oldTime;
 };
